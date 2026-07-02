@@ -10,6 +10,7 @@ import { StyleguidePage } from '@/pages/StyleguidePage';
 import { PaginaPublicaPage } from '@/pages/public/PaginaPublicaPage';
 import { LoginPage } from '@/pages/app/LoginPage';
 import OnboardingPage from '@/pages/app/OnboardingPage';
+import { DashboardPage } from '@/pages/app/DashboardPage';
 
 // Componente para proteger rotas (requer autenticação)
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -59,10 +60,7 @@ const AppRoutesContent: React.FC = () => {
       <Route path="/app/dashboard" element={
         <ProtectedRoute>
           <AppLayout>
-            <div className="text-center py-12">
-              <h1 className="text-3xl font-serif font-bold mb-4">Dashboard</h1>
-              <p className="text-support-300">Página inicial da barbearia</p>
-            </div>
+            <DashboardPage />
           </AppLayout>
         </ProtectedRoute>
       } />
