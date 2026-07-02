@@ -8,6 +8,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { SuperAdminLayout } from '@/components/layout/SuperAdminLayout';
 import { StyleguidePage } from '@/pages/StyleguidePage';
 import { PaginaPublicaPage } from '@/pages/public/PaginaPublicaPage';
+import { AgendamentoPublicoPage } from '@/pages/public/AgendamentoPublicoPage';
 import { LoginPage } from '@/pages/app/LoginPage';
 import OnboardingPage from '@/pages/app/OnboardingPage';
 import { DashboardPage } from '@/pages/app/DashboardPage';
@@ -35,6 +36,11 @@ const AppRoutesContent: React.FC = () => {
       <Route path="/:slug" element={
         <PublicLayout>
           <PaginaPublicaPage />
+        </PublicLayout>
+      } />
+      <Route path="/:slug/agendar" element={
+        <PublicLayout>
+          <AgendamentoPublicoPage />
         </PublicLayout>
       } />
       

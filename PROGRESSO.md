@@ -8,7 +8,7 @@
 - ✅ FASE 3 — Onboarding da Barbearia
 - ✅ FASE 4 — Dashboard Administrativo
 - ✅ FASE 5 — Agenda / Agendamentos (área interna)
-- ⏳ FASE 6 — Página Pública de Agendamento (cliente final)
+- ✅ FASE 6 — Página Pública de Agendamento (cliente final)
 - ⏳ FASE 7 — Módulo de Clientes (CRM leve)
 - ⏳ FASE 8 — Financeiro / Comandas
 - ⏳ FASE 9 — Comissões
