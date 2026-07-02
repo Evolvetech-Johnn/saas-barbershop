@@ -11,6 +11,7 @@ import { PaginaPublicaPage } from '@/pages/public/PaginaPublicaPage';
 import { LoginPage } from '@/pages/app/LoginPage';
 import OnboardingPage from '@/pages/app/OnboardingPage';
 import { DashboardPage } from '@/pages/app/DashboardPage';
+import { AgendaPage } from '@/pages/app/AgendaPage';
 
 // Componente para proteger rotas (requer autenticação)
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -65,6 +66,13 @@ const AppRoutesContent: React.FC = () => {
         </ProtectedRoute>
       } />
       
+      <Route path="/app/agenda" element={
+        <ProtectedRoute>
+          <AppLayout>
+            <AgendaPage />
+          </AppLayout>
+        </ProtectedRoute>
+      } />
       <Route path="/app/*" element={
         <ProtectedRoute>
           <AppLayout>
