@@ -13,6 +13,7 @@ import { LoginPage } from '@/pages/app/LoginPage';
 import OnboardingPage from '@/pages/app/OnboardingPage';
 import { DashboardPage } from '@/pages/app/DashboardPage';
 import { AgendaPage } from '@/pages/app/AgendaPage';
+import { ClientesPage } from '@/pages/app/ClientesPage';
 
 // Componente para proteger rotas (requer autenticação)
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -76,6 +77,13 @@ const AppRoutesContent: React.FC = () => {
         <ProtectedRoute>
           <AppLayout>
             <AgendaPage />
+          </AppLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/app/clientes" element={
+        <ProtectedRoute>
+          <AppLayout>
+            <ClientesPage />
           </AppLayout>
         </ProtectedRoute>
       } />
