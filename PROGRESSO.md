@@ -5,7 +5,7 @@
 - ✅ FASE 0 — Planejamento (docs/plano-geral.md)
 - ✅ FASE 1 — Setup do Projeto e Design System
 - ✅ FASE 2 — Autenticação e Contexto de Tenant
-- ⏳ FASE 3 — Onboarding da Barbearia
+- ✅ FASE 3 — Onboarding da Barbearia
 - ⏳ FASE 4 — Dashboard Administrativo
 - ⏳ FASE 5 — Agenda / Agendamentos (área interna)
 - ⏳ FASE 6 — Página Pública de Agendamento (cliente final)
