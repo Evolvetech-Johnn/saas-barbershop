@@ -23,7 +23,7 @@ export const PlanoFidelidadeCard: React.FC<PlanoFidelidadeCardProps> = ({
           <h3 className="text-xl font-bold font-serif mb-1">{plano.nome}</h3>
           <p className="text-support-300 text-sm">{plano.descricao}</p>
         </div>
-        <Badge variant={plano.ativo ? 'default' : 'secondary'}>
+        <Badge variant={plano.ativo ? 'default' : 'default'}>
           {plano.ativo ? 'Ativo' : 'Inativo'}
         </Badge>
       </div>

@@ -14,8 +14,8 @@
 - ✅ FASE 9 — Comissões
 - ✅ FASE 10 — Estoque e Produtos
 - ✅ FASE 11 — Planos de Fidelidade / Assinatura do Cliente Final
-- ⏳ FASE 12 — Automação de WhatsApp (mock) e Notificações
-- ⏳ FASE 13 — Relatórios / BI Avançado
+- ✅ FASE 12 — Automação de WhatsApp (mock) e Notificações
+- ✅ FASE 13 — Relatórios / BI Avançado
 - ⏳ FASE 14 — Painel Super Admin (dono do SaaS)
-- ⏳ FASE 15 — Responsividade, Acessibilidade e Revisão Geral
+- ✅ FASE 15 — Responsividade, Acessibilidade e Revisão Geral
 - ⏳ FASE 16 — Plano de Backend Multi-Tenant (documentação)

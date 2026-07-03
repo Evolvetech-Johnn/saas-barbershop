@@ -1,33 +1,29 @@
 import React, { useState } from 'react'
-import { useAuth } from '@/context/AuthContext'
 import { useTenant } from '@/context/TenantContext'
 import { useToast } from '@/context/ToastContext'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Select } from '@/components/ui/Select'
 import { Card } from '@/components/ui/Card'
-import { Tenant } from '@/types/tenant'
 import { generateSlug } from '@/utils/slug'
 
 const OnboardingPage: React.FC = () => {
-  const { usuario } = useAuth()
-  const { tenant, setTenant, availableTenants, switchTenant } = useTenant()
+  const { availableTenants, setTenant, updateTenant, tenant } = useTenant()
   const { addToast } = useToast()
   const navigate = useNavigate()
 
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
-    nome: '',
-    slug: '',
-    corAcento: '#d4af37',
-    descricaoPublica: '',
-    endereco: '',
-    telefone: '',
-    horarioFuncionamento: '',
+    nome: tenant?.nome || '',
+    slug: tenant?.slug || '',
+    corAcento: tenant?.corAcento || '#d4af37',
+    descricaoPublica: tenant?.descricaoPublica || '',
+    endereco: tenant?.endereco || '',
+    telefone: tenant?.telefone || '',
+    horarioFuncionamento: tenant?.horarioFuncionamento || '',
   })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
@@ -48,13 +44,25 @@ const OnboardingPage: React.FC = () => {
     setStep(prev => prev - 1)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    await updateTenant({
+      nome: formData.nome,
+      slug: formData.slug,
+      corAcento: formData.corAcento,
+      descricaoPublica: formData.descricaoPublica,
+      endereco: formData.endereco,
+      telefone: formData.telefone,
+      horarioFuncionamento: formData.horarioFuncionamento,
+      onboardingConcluido: true,
+    })
+    
     addToast('Onboarding concluído com sucesso!', 'success')
     navigate('/app/dashboard')
   }
 
-  const handleSelectExistingTenant = (tenantId: string) => {
+  const handleSelectExistingTenant = async (tenantId: string) => {
     const selectedTenant = availableTenants.find(t => t.id === tenantId)
     if (selectedTenant) {
       setTenant(selectedTenant)
@@ -118,8 +126,7 @@ const OnboardingPage: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-semibold">{t.nome}</h3>
-                        <p className="text-sm text-support-300">{t.slug}</p>
+                        <p className="text-sm text-support-300">{t.nome}</p>
                       </div>
                       <div
                         className="w-8 h-8 rounded-full"

@@ -36,7 +36,7 @@ export const ProdutoTable: React.FC<ProdutoTableProps> = ({ produtos, onEdit, on
               <TableRow key={produto.id}>
                 <TableCell className="font-medium">{produto.nome}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{produto.categoria}</Badge>
+                  <Badge variant="default">{produto.categoria}</Badge>
                 </TableCell>
                 <TableCell className="text-[var(--tenant-accent)]">{formatCurrency(produto.preco)}</TableCell>
                 <TableCell>

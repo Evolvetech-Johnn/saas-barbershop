@@ -1,22 +1,11 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Select } from '@/components/ui/Select'
 import { CalendarioAgenda } from '@/components/agenda/CalendarioAgenda'
-
-interface Servico {
-  id: string
-  nome: string
-  preco: number
-  duracao: number
-}
-
-const mockServicos: Servico[] = [
-  { id: '1', nome: 'Corte de Cabelo', preco: 35, duracao: 30 },
-  { id: '2', nome: 'Barba', preco: 25, duracao: 20 },
-  { id: '3', nome: 'Corte + Barba', preco: 55, duracao: 50 },
-  { id: '4', nome: 'Sobrancelha', preco: 15, duracao: 15 },
-]
+import { useTenant } from '@/context/TenantContext'
+import { mockData } from '@/data/mockData'
+import { agendamentoService } from '@/services/agendamentoService'
+import { useToast } from '@/context/ToastContext'
 
 const mockHorarios = [
   '09:00',
@@ -35,6 +24,12 @@ const mockHorarios = [
 ]
 
 export const AgendamentoPublicoForm: React.FC = () => {
+  const { tenant } = useTenant()
+  const { addToast } = useToast()
+  
+  const servicos = tenant ? mockData.servicos.filter(s => s.tenantId === tenant.id) : []
+  const profissionais = tenant ? mockData.profissionais.filter(p => p.tenantId === tenant.id) : []
+
   const [step, setStep] = useState(1)
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [formData, setFormData] = useState({
@@ -48,7 +43,26 @@ export const AgendamentoPublicoForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!tenant) return
+
+    const [horas, minutos] = formData.horario.split(':').map(Number)
+    const dataHora = new Date(selectedDate)
+    dataHora.setHours(horas, minutos, 0, 0)
+
+    agendamentoService.createAgendamento({
+      tenantId: tenant.id,
+      clienteNome: formData.nome,
+      clienteTelefone: formData.telefone,
+      clienteEmail: formData.email,
+      servicoId: formData.servico,
+      profissionalId: formData.profissional,
+      dataHora,
+      status: 'confirmado'
+    })
+
     setStep(4)
+    addToast('Agendamento confirmado com sucesso!', 'success')
   }
 
   const handleNextStep = () => {
@@ -75,7 +89,7 @@ export const AgendamentoPublicoForm: React.FC = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {mockServicos.map((servico) => (
+            {servicos.map((servico) => (
               <button
                 key={servico.id}
                 onClick={() => setFormData({ ...formData, servico: servico.id })}
@@ -87,7 +101,7 @@ export const AgendamentoPublicoForm: React.FC = () => {
               >
                 <h4 className="font-semibold">{servico.nome}</h4>
                 <p className="text-sm text-support-300">
-                  {servico.duracao} min • R$ {servico.preco.toFixed(2)}
+                  {servico.duracaoMinutos} min • R$ {servico.preco.toFixed(2)}
                 </p>
               </button>
             ))}
@@ -111,10 +125,7 @@ export const AgendamentoPublicoForm: React.FC = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[
-              { id: '1', nome: 'Carlos', avatar: '🧔🏻' },
-              { id: '2', nome: 'Ana', avatar: '👩🏻' },
-            ].map((profissional) => (
+            {profissionais.map((profissional) => (
               <button
                 key={profissional.id}
                 onClick={() =>
@@ -128,7 +139,7 @@ export const AgendamentoPublicoForm: React.FC = () => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-base-800 flex items-center justify-center text-2xl">
-                    {profissional.avatar}
+                    🧔🏻
                   </div>
                   <h4 className="font-semibold">{profissional.nome}</h4>
                 </div>
@@ -243,7 +254,17 @@ export const AgendamentoPublicoForm: React.FC = () => {
               Você receberá um email com os detalhes do agendamento em breve.
             </p>
           </div>
-          <Button onClick={() => setStep(1)}>
+          <Button onClick={() => {
+            setStep(1)
+            setFormData({
+              nome: '',
+              telefone: '',
+              email: '',
+              servico: '',
+              profissional: '',
+              horario: '',
+            })
+          }}>
             Agendar outro horário
           </Button>
         </div>

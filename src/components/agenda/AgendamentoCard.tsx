@@ -1,21 +1,4 @@
-import React from 'react'
-import { Badge } from '@/components/ui/Badge'
-import { Avatar } from '@/components/ui/Avatar'
-
-interface AgendamentoCardProps {
-  cliente: string
-  profissional: string
-  servico: string
-  horario: string
-  status: 'confirmado' | 'concluido' | 'faltou' | 'cancelado'
-}
-
-const statusLabels: Record<string, string> = {
-  confirmado: 'Confirmado',
-  concluido: 'Concluído',
-  faltou: 'Faltou',
-  cancelado: 'Cancelado'
-}
+import { useAgenda } from '@/hooks/useAgenda';
 
 export const AgendamentoCard: React.FC<AgendamentoCardProps> = ({
   cliente,
@@ -24,6 +7,15 @@ export const AgendamentoCard: React.FC<AgendamentoCardProps> = ({
   horario,
   status,
 }) => {
+  const { concluirAgendamento } = useAgenda();
+  const handleConcluir = () => {
+    // Find the underlying agendamento by matching fields (simplified lookup)
+    const ag = mockData.agendamentos.find(
+      a => a.clienteNome === cliente && a.profissionalId === professionalId && a.servicoId === serviceId && a.dataHora === horario,
+    );
+    if (ag) concluirAgendamento(ag.id);
+  };
+
   return (
     <div className="bg-base-900 border border-base-800 rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
@@ -53,7 +45,12 @@ export const AgendamentoCard: React.FC<AgendamentoCardProps> = ({
         >
           {statusLabels[status]}
         </Badge>
+        {status === 'confirmado' && (
+          <Button variant="success" size="sm" onClick={handleConcluir}>
+            Concluir
+          </Button>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};

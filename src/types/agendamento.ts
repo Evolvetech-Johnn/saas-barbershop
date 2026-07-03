@@ -11,4 +11,5 @@ export interface Agendamento {
   observacoes?: string;
   clienteNome: string;
   clienteTelefone: string;
+  clienteEmail?: string;
 }

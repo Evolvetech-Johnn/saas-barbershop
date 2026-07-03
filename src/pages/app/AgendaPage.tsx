@@ -3,45 +3,32 @@ import { Button } from '@/components/ui/Button'
 import { CalendarioAgenda } from '@/components/agenda/CalendarioAgenda'
 import { AgendamentoCard } from '@/components/agenda/AgendamentoCard'
 import { AgendamentoFormModal } from '@/components/agenda/AgendamentoFormModal'
-
-const mockAgendamentos = [
-  {
-    id: '1',
-    cliente: 'João Silva',
-    profissional: 'Carlos',
-    servico: 'Corte de Cabelo',
-    horario: '10:00',
-    status: 'confirmado'
-  },
-  {
-    id: '2',
-    cliente: 'Maria Santos',
-    profissional: 'Ana',
-    servico: 'Barba',
-    horario: '10:30',
-    status: 'confirmado'
-  },
-  {
-    id: '3',
-    cliente: 'Pedro Costa',
-    profissional: 'Carlos',
-    servico: 'Corte + Barba',
-    horario: '11:00',
-    status: 'confirmado'
-  },
-  {
-    id: '4',
-    cliente: 'Lucas Ferreira',
-    profissional: 'Ana',
-    servico: 'Corte de Cabelo',
-    horario: '11:30',
-    status: 'confirmado'
-  }
-]
+import { useAgenda } from '@/hooks/useAgenda'
+import { mockData } from '@/data/mockData'
+import { useTenant } from '@/context/TenantContext'
 
 export const AgendaPage: React.FC = () => {
+  const { tenant } = useTenant()
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { agendamentos, criarAgendamento } = useAgenda()
+
+  const agendamentosDoDia = agendamentos.filter((a) => {
+    const d = new Date(a.dataHora)
+    return (
+      d.getDate() === selectedDate.getDate() &&
+      d.getMonth() === selectedDate.getMonth() &&
+      d.getFullYear() === selectedDate.getFullYear()
+    )
+  })
+
+  // Helper function to resolve names
+  const getProfissionalNome = (id: string) => {
+    return mockData.profissionais.find(p => p.id === id)?.nome || 'Profissional'
+  }
+  const getServicoNome = (id: string) => {
+    return mockData.servicos.find(s => s.id === id)?.nome || 'Serviço'
+  }
 
   return (
     <div className="space-y-6">
@@ -72,22 +59,28 @@ export const AgendaPage: React.FC = () => {
 
         <div className="lg:col-span-2 space-y-4">
           <h3 className="text-lg font-semibold">Atendimentos do dia</h3>
-          {mockAgendamentos.map((agendamento) => (
+          {agendamentosDoDia.map((agendamento) => (
             <AgendamentoCard
               key={agendamento.id}
-              cliente={agendamento.cliente}
-              profissional={agendamento.profissional}
-              servico={agendamento.servico}
-              horario={agendamento.horario}
+              cliente={agendamento.clienteNome}
+              profissional={getProfissionalNome(agendamento.profissionalId)}
+              servico={getServicoNome(agendamento.servicoId)}
+              horario={new Date(agendamento.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
               status={agendamento.status}
             />
           ))}
+          {agendamentosDoDia.length === 0 && (
+             <div className="text-center py-8 bg-base-900 border border-base-800 rounded-lg">
+                <p className="text-support-300">Nenhum agendamento para este dia.</p>
+             </div>
+          )}
         </div>
       </div>
 
       <AgendamentoFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onSave={criarAgendamento}
       />
     </div>
   )

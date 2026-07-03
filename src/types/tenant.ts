@@ -14,4 +14,5 @@ export interface Tenant {
   telefone?: string;
   horarioFuncionamento?: string;
   imagensGaleria?: string[];
+  onboardingConcluido?: boolean;
 }

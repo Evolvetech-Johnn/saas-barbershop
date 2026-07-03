@@ -2,50 +2,44 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ClienteCard } from '@/components/clientes/ClienteCard'
-
-const mockClientes = [
-  {
-    id: '1',
-    nome: 'João Silva',
-    telefone: '(11) 98765-4321',
-    email: 'joao@email.com',
-    totalAtendimentos: 12,
-    ultimoAtendimento: '02/07/2025',
-  },
-  {
-    id: '2',
-    nome: 'Maria Santos',
-    telefone: '(11) 91234-5678',
-    email: 'maria@email.com',
-    totalAtendimentos: 8,
-    ultimoAtendimento: '28/06/2025',
-    aniversario: '12/07',
-  },
-  {
-    id: '3',
-    nome: 'Pedro Costa',
-    telefone: '(11) 99876-5432',
-    email: 'pedro@email.com',
-    totalAtendimentos: 15,
-    ultimoAtendimento: '30/06/2025',
-  },
-  {
-    id: '4',
-    nome: 'Lucas Ferreira',
-    telefone: '(11) 91111-2222',
-    email: 'lucas@email.com',
-    totalAtendimentos: 5,
-    ultimoAtendimento: '25/06/2025',
-  },
-]
+import { ClienteForm } from '@/components/clientes/ClienteForm'
+import { useClientes } from '@/hooks/useClientes'
+import { Cliente } from '@/types/cliente'
 
 export const ClientesPage: React.FC = () => {
   const [busca, setBusca] = useState('')
+  const { clientes, criarCliente, atualizarCliente, excluirCliente } = useClientes()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
 
-  const clientesFiltrados = mockClientes.filter((cliente) =>
+  const clientesFiltrados = clientes.filter((cliente) =>
     cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
     cliente.telefone.includes(busca)
   )
+
+  const handleOpenNew = () => {
+    setClienteSelecionado(null)
+    setIsModalOpen(true)
+  }
+
+  const handleOpenEdit = (cliente: Cliente) => {
+    setClienteSelecionado(cliente)
+    setIsModalOpen(true)
+  }
+
+  const handleSave = (data: Omit<Cliente, 'id' | 'tenantId'>) => {
+    if (clienteSelecionado) {
+      atualizarCliente(clienteSelecionado.id, data)
+    } else {
+      criarCliente(data)
+    }
+  }
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Tem certeza que deseja arquivar este cliente?')) {
+      excluirCliente(id)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -53,10 +47,10 @@ export const ClientesPage: React.FC = () => {
         <div>
           <h1 className="text-3xl font-serif font-bold mb-2">Clientes</h1>
           <p className="text-support-300">
-            {mockClientes.length} clientes cadastrados
+            {clientes.length} clientes cadastrados
           </p>
         </div>
-        <Button>Novo Cliente</Button>
+        <Button onClick={handleOpenNew}>Novo Cliente</Button>
       </div>
 
       <div className="max-w-md">
@@ -74,12 +68,26 @@ export const ClientesPage: React.FC = () => {
             nome={cliente.nome}
             telefone={cliente.telefone}
             email={cliente.email}
-            totalAtendimentos={cliente.totalAtendimentos}
-            ultimoAtendimento={cliente.ultimoAtendimento}
-            aniversario={cliente.aniversario}
+            totalAtendimentos={12} // mock for now, ideally would be derived
+            ultimoAtendimento={'25/06/2026'} // mock for now, ideally derived
+            aniversario={cliente.dataNascimento ? new Date(cliente.dataNascimento).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}) : undefined}
+            onEdit={() => handleOpenEdit(cliente)}
+            onDelete={() => handleDelete(cliente.id)}
           />
         ))}
+        {clientesFiltrados.length === 0 && (
+          <div className="col-span-full text-center py-12 bg-base-900 border border-base-800 rounded-lg">
+            <p className="text-support-300">Nenhum cliente encontrado.</p>
+          </div>
+        )}
       </div>
+
+      <ClienteForm
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+        cliente={clienteSelecionado}
+      />
     </div>
   )
 }

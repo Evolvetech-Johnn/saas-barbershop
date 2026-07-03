@@ -15,7 +15,7 @@ export const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
   };
 
   return (
-    <div className={`px-4 py-3 rounded-lg shadow-lg flex items-center justify-between min-w-[300px] ${typeClasses[type]}`}>
+    <div role="status" aria-live="polite" aria-label={type} className={`px-4 py-3 rounded-lg shadow-lg flex items-center justify-between min-w-[300px] ${typeClasses[type]}`} >
       <span>{message}</span>
       <button onClick={onClose} className="ml-4 text-sm hover:opacity-70">
         ×

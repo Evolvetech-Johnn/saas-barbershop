@@ -1,14 +1,28 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTenant } from '@/context/TenantContext';
 import { Button } from '@/components/ui/Button';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 
 interface PublicLayoutProps {
   children: React.ReactNode;
 }
 
 export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
-  const { tenant } = useTenant();
+  const { tenant, switchTenant, availableTenants } = useTenant();
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (slug && availableTenants.length > 0) {
+      if (!tenant || tenant.slug !== slug) {
+        switchTenant(slug);
+      }
+    }
+  }, [slug, availableTenants, tenant, switchTenant]);
+
+  if (!tenant || tenant.slug !== slug) {
+    return <div className="min-h-screen bg-base-950 flex items-center justify-center"><p className="text-support-300">Carregando...</p></div>;
+  }
 
   return (
     <div className="min-h-screen bg-base-950">
@@ -31,6 +45,9 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
               </Link>
               <Link to={`/${tenant.slug}/#contato`} className="text-support-200 hover:text-[var(--tenant-accent)] transition-colors">
                 Contato
+              </Link>
+              <Link to={`/${tenant.slug}/app/comissoes`} className="text-support-200 hover:text-[var(--tenant-accent)] transition-colors">
+                Comissões
               </Link>
             </nav>
             <Link to={`/${tenant.slug}/agendar`}>

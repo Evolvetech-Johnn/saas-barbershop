@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { useFinanceiro } from '@/hooks/useFinanceiro'
+import { useComandas } from '@/hooks/useComandas'
 import { FluxoCaixaTable } from '@/components/financeiro/FluxoCaixaTable'
 import { ComandaModal } from '@/components/financeiro/ComandaModal'
 import { Comanda } from '@/types/comanda'
-import { formatCurrency } from '@/utils/formatters'
+import { formatters } from '@/utils/formatters'
 
 const getFormaPagamentoLabel = (forma: string): string => {
   const labels: Record<string, string> = {
@@ -17,7 +18,8 @@ const getFormaPagamentoLabel = (forma: string): string => {
 }
 
 export const FinanceiroPage: React.FC = () => {
-  const { comandas, totais, criarComanda } = useFinanceiro()
+  const { totais } = useFinanceiro()
+  const { comandas, loading: loadingComandas, carregarComandas } = useComandas()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [comandaSelecionada, setComandaSelecionada] = useState<Comanda | undefined>()
 
@@ -32,7 +34,7 @@ export const FinanceiroPage: React.FC = () => {
   }
 
   const handleSaveComanda = (data: Omit<Comanda, 'id' | 'tenantId' | 'dataHora'>) => {
-    criarComanda(data)
+    // Not used in this view – creation is handled via agenda flow
   }
 
   return (
@@ -50,15 +52,15 @@ export const FinanceiroPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-base-900 border border-base-800 rounded-lg p-6">
           <p className="text-sm text-support-300 mb-1">Total do mês</p>
-          <p className="text-2xl font-bold">{formatCurrency(totais.total)}</p>
+          <p className="text-2xl font-bold">{formatters.currency(totais.total)}</p>
         </div>
         <div className="bg-base-900 border border-base-800 rounded-lg p-6">
           <p className="text-sm text-support-300 mb-1">Recebido</p>
-          <p className="text-2xl font-bold text-green-400">{formatCurrency(totais.recebido)}</p>
+          <p className="text-2xl font-bold text-green-400">{formatters.currency(totais.recebido)}</p>
         </div>
         <div className="bg-base-900 border border-base-800 rounded-lg p-6">
           <p className="text-sm text-support-300 mb-1">A receber</p>
-          <p className="text-2xl font-bold text-yellow-400">{formatCurrency(totais.areceber)}</p>
+          <p className="text-2xl font-bold text-yellow-400">{formatters.currency(totais.areceber)}</p>
         </div>
       </div>
 
@@ -66,7 +68,7 @@ export const FinanceiroPage: React.FC = () => {
         {Object.entries(totais.formasPagamento).map(([forma, valor]) => (
           <div key={forma} className="bg-base-900 border border-base-800 rounded-lg p-4">
             <p className="text-sm text-support-300 mb-1">{getFormaPagamentoLabel(forma)}</p>
-            <p className="text-lg font-bold">{formatCurrency(valor as number)}</p>
+            <p className="text-lg font-bold">{formatters.currency(valor as number)}</p>
           </div>
         ))}
       </div>

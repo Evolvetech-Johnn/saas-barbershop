@@ -1,25 +1,9 @@
-export const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-};
+export { formatCurrency } from '@/utils/currency';
+export { formatDate, formatTime, formatDateTime } from '@/utils/date';
 
-export const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(date);
-};
-
-export const formatTime = (date: Date): string => {
-  return new Intl.DateTimeFormat('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-};
-
-export const formatDateTime = (date: Date): string => {
-  return `${formatDate(date)} às ${formatTime(date)}`;
+export const formatters = {
+  currency: formatCurrency,
+  date: formatDate,
+  time: formatTime,
+  dateTime: formatDateTime,
 };
