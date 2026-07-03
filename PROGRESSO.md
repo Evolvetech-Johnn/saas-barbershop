@@ -10,10 +10,10 @@
 - ✅ FASE 5 — Agenda / Agendamentos (área interna)
 - ✅ FASE 6 — Página Pública de Agendamento (cliente final)
 - ✅ FASE 7 — Módulo de Clientes (CRM leve)
-- ⏳ FASE 8 — Financeiro / Comandas
-- ⏳ FASE 9 — Comissões
-- ⏳ FASE 10 — Estoque e Produtos
-- ⏳ FASE 11 — Planos de Fidelidade / Assinatura do Cliente Final
+- ✅ FASE 8 — Financeiro / Comandas
+- ✅ FASE 9 — Comissões
+- ✅ FASE 10 — Estoque e Produtos
+- ✅ FASE 11 — Planos de Fidelidade / Assinatura do Cliente Final
 - ⏳ FASE 12 — Automação de WhatsApp (mock) e Notificações
 - ⏳ FASE 13 — Relatórios / BI Avançado
 - ⏳ FASE 14 — Painel Super Admin (dono do SaaS)
