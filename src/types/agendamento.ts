@@ -7,6 +7,7 @@ export interface Agendamento {
   clienteId?: string;
   servicoId: string;
   dataHora: Date;
+  duracaoMinutos?: number;
   status: StatusAgendamento;
   observacoes?: string;
   clienteNome: string;
