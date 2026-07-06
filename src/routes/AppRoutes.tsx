@@ -1,8 +1,9 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { TenantProvider, useTenant } from '@/context/TenantContext';
 import { ToastProvider } from '@/context/ToastContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { RoleBasedRoute } from '@/components/routes/RoleBasedRoute';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SuperAdminLayout } from '@/components/layout/SuperAdminLayout';
@@ -39,10 +40,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const isAdmin = localStorage.getItem('saas_superadmin') === 'true';
-  if (!isAdmin) {
-    return <Navigate to="/admin/login" replace />;
-  }
+  // Keep for backwards compatibility — wrap with RoleBasedRoute at usage site.
   return <>{children}</>;
 };
 
@@ -177,17 +175,19 @@ const AppRoutesContent: React.FC = () => {
       <Route path="/admin/login" element={<SuperAdminLoginPage />} />
 
       <Route path="/admin/*" element={
-        <AdminProtectedRoute>
-          <SuperAdminLayout>
-            <Routes>
-              <Route path="tenants" element={<TenantsPage />} />
-              <Route path="tenants/:id" element={<TenantDetalhePage />} />
-              <Route path="planos" element={<PlanosSaaSPage />} />
-              <Route path="faturamento" element={<FaturamentoSaaSPage />} />
-              <Route path="*" element={<Navigate to="tenants" replace />} />
-            </Routes>
-          </SuperAdminLayout>
-        </AdminProtectedRoute>
+        <RoleBasedRoute allowedRoles={[ 'admin' ]} redirectTo="/admin/login">
+          <AdminProtectedRoute>
+            <SuperAdminLayout>
+              <Routes>
+                <Route path="tenants" element={<TenantsPage />} />
+                <Route path="tenants/:id" element={<TenantDetalhePage />} />
+                <Route path="planos" element={<PlanosSaaSPage />} />
+                <Route path="faturamento" element={<FaturamentoSaaSPage />} />
+                <Route path="*" element={<Navigate to="tenants" replace />} />
+              </Routes>
+            </SuperAdminLayout>
+          </AdminProtectedRoute>
+        </RoleBasedRoute>
       } />
     </Routes>
   );

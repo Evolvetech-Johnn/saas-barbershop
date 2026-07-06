@@ -1,7 +1,6 @@
-import { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
 
-const authRoutes: FastifyPluginAsync = async (fastify, opts) => {
+const authRoutes = async (fastify: any, opts: any) => {
   // Login
   fastify.post('/auth/login', async (request, reply) => {
     // In a real app, validate credentials against DB
@@ -10,10 +9,15 @@ const authRoutes: FastifyPluginAsync = async (fastify, opts) => {
       password: z.string().min(6),
     });
     const { email, password } = bodySchema.parse(request.body);
-    // Dummy user & tenant
-    const user = { id: 'user-1', email, tenantId: request.headers['x-tenant-id'] as string || 'default' };
-    const token = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId }, { expiresIn: '1h' });
-    const refreshToken = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId }, { expiresIn: '7d' });
+    // Dummy user & tenant. In real app retrieve user from DB and include role from user record.
+    const tenantId = request.headers['x-tenant-id'] as string || 'default';
+    // Default role should be 'cliente' unless DB/user record indicates otherwise. For demo, accept admin@saas.com as admin.
+    const role = (email === 'admin@saas.com' && password === 'admin123') ? 'admin' : 'cliente';
+    const user = { id: 'user-1', email, tenantId, role };
+
+    // Include role in the JWT payload so backend and frontend can rely on it for authorization decisions.
+    const token = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.role }, { expiresIn: '1h' });
+    const refreshToken = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.role }, { expiresIn: '7d' });
     return reply.send({ token, refreshToken, user });
   });
 
