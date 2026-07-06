@@ -29,15 +29,15 @@ export const PlanoSaaSCard: React.FC<PlanoSaaSCardProps> = ({ plan, onEdit }) =>
         <div className="space-y-2 border-t border-base-800 pt-4">
           <p className="text-xs font-semibold text-support-300 uppercase tracking-wider">Limites do Plano</p>
           <ul className="space-y-1.5 text-sm text-support-200">
-            <li className="flex justify-between">
+            <li className="flex justify-between gap-3">
               <span>Profissionais:</span>
               <span className="font-semibold text-base-100">{plan.limiteProfissionais}</span>
             </li>
-            <li className="flex justify-between">
+            <li className="flex justify-between gap-3">
               <span>Serviços:</span>
               <span className="font-semibold text-base-100">{plan.limiteServicos}</span>
             </li>
-            <li className="flex justify-between">
+            <li className="flex justify-between gap-3">
               <span>Clientes:</span>
               <span className="font-semibold text-base-100">{plan.limiteClientes}</span>
             </li>

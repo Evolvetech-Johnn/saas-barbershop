@@ -156,7 +156,7 @@ export const PlanoFidelidadeForm: React.FC<PlanoFidelidadeFormProps> = ({
           </label>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancelar
           </Button>

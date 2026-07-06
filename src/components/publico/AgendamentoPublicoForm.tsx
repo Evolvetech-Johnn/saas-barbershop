@@ -191,16 +191,16 @@ export const AgendamentoPublicoForm: React.FC = () => {
                     : 'border-base-800 bg-base-900 hover:bg-base-800'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <div className="w-12 h-12 rounded-full bg-base-800 flex items-center justify-center text-2xl">
                     🧔🏻
                   </div>
-                  <h4 className="font-semibold">{profissional.nome}</h4>
+                  <h4 className="font-semibold truncate">{profissional.nome}</h4>
                 </div>
               </button>
             ))}
           </div>
-          <div className="flex justify-between pt-4">
+          <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">
             <Button variant="ghost" onClick={handlePrevStep}>
               Voltar
             </Button>
@@ -233,7 +233,7 @@ export const AgendamentoPublicoForm: React.FC = () => {
                 <h4 className="font-semibold mb-3">Horários disponíveis</h4>
                 {formData.profissional ? (
                   horariosDisponiveis.length > 0 ? (
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {horariosDisponiveis.map((horario) => (
                         <button
                           key={horario}
@@ -324,7 +324,7 @@ export const AgendamentoPublicoForm: React.FC = () => {
               />
             </div>
           </div>
-          <div className="flex justify-between pt-4">
+          <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">
             <Button variant="ghost" onClick={handlePrevStep}>
               Voltar
             </Button>

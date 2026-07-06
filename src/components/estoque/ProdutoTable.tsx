@@ -47,7 +47,7 @@ export const ProdutoTable: React.FC<ProdutoTableProps> = ({ produtos, onEdit, on
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
+                  <div className="flex flex-col sm:flex-row justify-end gap-2">
                     {onEdit && (
                       <Button variant="ghost" size="sm" onClick={() => onEdit(produto)}>
                         Editar

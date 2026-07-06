@@ -40,17 +40,17 @@ export const ProximosAgendamentos: React.FC<ProximosAgendamentosProps> = ({ agen
             const horarioFormatado = `${horas}:${minutos}`
 
             return (
-              <div key={agendamento.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div key={agendamento.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   <Avatar name={nomeCliente} size="md" />
-                  <div>
-                    <p className="font-medium">{nomeCliente}</p>
-                    <p className="text-sm text-support-300">
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{nomeCliente}</p>
+                    <p className="text-sm text-support-300 truncate">
                       {servico?.nome || 'Serviço'} • {profissional?.nome || 'Profissional'}
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <p className="font-medium">{horarioFormatado}</p>
                   <Badge
                     variant={

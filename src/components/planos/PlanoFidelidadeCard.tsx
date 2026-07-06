@@ -44,7 +44,7 @@ export const PlanoFidelidadeCard: React.FC<PlanoFidelidadeCardProps> = ({
         ))}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         {onEdit && (
           <Button variant="secondary" size="sm" className="flex-1" onClick={() => onEdit(plano)}>
             Editar

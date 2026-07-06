@@ -137,7 +137,7 @@ export const AgendamentoFormModal: React.FC<AgendamentoFormModalProps> = ({
             ))}
           </Select>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-support-200 mb-2">Data</label>
             <Input
@@ -179,7 +179,7 @@ export const AgendamentoFormModal: React.FC<AgendamentoFormModalProps> = ({
             </div>
           </div>
         )}
-        <div className="flex gap-3 justify-end pt-4">
+        <div className="flex flex-col sm:flex-row gap-3 justify-end pt-4">
           <Button type="button" variant="ghost" onClick={onClose}>
             Cancelar
           </Button>

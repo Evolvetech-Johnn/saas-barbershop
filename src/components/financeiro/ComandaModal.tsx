@@ -129,7 +129,7 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
       title={comanda ? 'Editar Comanda' : 'Nova Comanda'}
     >
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-support-200 mb-1">
               Cliente
@@ -166,8 +166,8 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
 
         <div className="border border-base-800 rounded-lg p-4">
           <h4 className="font-medium mb-3">Itens</h4>
-          <div className="grid grid-cols-12 gap-2 mb-3">
-            <div className="col-span-3">
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 mb-3">
+            <div className="col-span-1 sm:col-span-3">
               <Select
                 value={novoItemTipo}
                 onChange={(e) => setNovoItemTipo(e.target.value as 'servico' | 'produto')}
@@ -176,7 +176,7 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
                 <option value="produto">Produto</option>
               </Select>
             </div>
-            <div className="col-span-5">
+            <div className="col-span-1 sm:col-span-5">
               <Select
                 value={novoItemId}
                 onChange={(e) => setNovoItemId(e.target.value)}
@@ -195,7 +195,7 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
                     ))}
               </Select>
             </div>
-            <div className="col-span-2">
+            <div className="col-span-1 sm:col-span-2">
               <Input
                 type="number"
                 min="1"
@@ -204,11 +204,11 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
                 placeholder="Qtd"
               />
             </div>
-            <div className="col-span-2">
+            <div className="col-span-1 sm:col-span-2">
               <Button onClick={adicionarItem} className="w-full">
                 +
               </Button>
-            </div>
+            </div> 
           </div>
 
           <div className="space-y-2">
@@ -239,7 +239,7 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-support-200 mb-1">
               Forma de Pagamento *
@@ -277,7 +277,7 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
           <Button variant="secondary" onClick={onClose}>
             Cancelar
           </Button>

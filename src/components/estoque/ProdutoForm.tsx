@@ -78,7 +78,7 @@ export const ProdutoForm: React.FC<ProdutoFormProps> = ({ isOpen, onClose, produ
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-support-200 mb-1">
               Categoria *
@@ -110,7 +110,7 @@ export const ProdutoForm: React.FC<ProdutoFormProps> = ({ isOpen, onClose, produ
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-support-200 mb-1">
               Custo (R$)
@@ -162,7 +162,7 @@ export const ProdutoForm: React.FC<ProdutoFormProps> = ({ isOpen, onClose, produ
           </label>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancelar
           </Button>

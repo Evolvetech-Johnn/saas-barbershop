@@ -140,7 +140,7 @@ export const ConfiguracoesTenantForm: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex justify-end pt-6 border-t border-base-800">
+      <div className="flex flex-col sm:flex-row justify-end pt-6 border-t border-base-800">
         <Button type="submit" disabled={isSaving}>
           {isSaving ? 'Salvando...' : 'Salvar Configurações'}
         </Button>

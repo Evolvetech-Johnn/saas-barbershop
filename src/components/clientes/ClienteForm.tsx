@@ -111,7 +111,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
             onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
           />
         </div>
-        <div className="flex gap-3 justify-end pt-4">
+        <div className="flex flex-col sm:flex-row gap-3 justify-end pt-4">
           <Button type="button" variant="ghost" onClick={onClose}>
             Cancelar
           </Button>
