@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTenant } from '@/context/TenantContext';
 import { Button } from '@/components/ui/Button';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 interface PublicLayoutProps {
   children: React.ReactNode;
@@ -10,7 +10,6 @@ interface PublicLayoutProps {
 export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   const { tenant, switchTenant, availableTenants } = useTenant();
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (slug && availableTenants.length > 0) {

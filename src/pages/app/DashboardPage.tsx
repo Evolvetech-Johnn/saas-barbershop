@@ -8,7 +8,7 @@ import { mockData } from '@/data/mockData'
 
 export const DashboardPage: React.FC = () => {
   const { tenant } = useTenant()
-  const { agendamentos } = useAgenda(new Date()) // get all for today's month, wait, useAgenda filters by month/day depending on its implementation. Let's assume it fetches all or we can filter.
+  const { agendamentos } = useAgenda()
   const { clientes } = useClientes()
 
   // Filtramos agendamentos de hoje
@@ -45,7 +45,7 @@ export const DashboardPage: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-serif font-bold mb-2">
-          Olá, {tenant.nome}!
+          Olá, {tenant?.nome ?? 'Barbearia'}!
         </h1>
         <p className="text-support-300">Aqui está o resumo do seu dia</p>
       </div>

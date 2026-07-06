@@ -1,3 +1,4 @@
+import { Agendamento } from '@/types/agendamento';
 import { FormaPagamento } from '@/types/comanda';
 import { comandaService } from '@/services/comandaService';
 
@@ -63,7 +64,6 @@ export const agendamentoService = {
     const ag = agendamentoService.getAgendamentos().find(a => a.id === agendamentoId && a.tenantId === tenantId);
     if (!ag) return;
     // Use comandaService to create comanda and commission
-    // @ts-ignore – comandaService imported below
     comandaService.createComandaFromAgendamento(tenantId, ag, formaPagamento);
     // Refresh is handled by caller
   },

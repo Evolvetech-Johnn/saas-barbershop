@@ -54,7 +54,7 @@ export const ConfiguracoesTenantForm: React.FC = () => {
       await updateTenant(formData);
       addToast('Configurações salvas com sucesso!', 'success');
     } catch (error) {
-      addToast('Erro ao salvar configurações.', 'danger');
+      addToast('Erro ao salvar configurações.', 'error');
     } finally {
       setIsSaving(false);
     }

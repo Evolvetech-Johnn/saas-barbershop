@@ -1,3 +1,4 @@
+import React from 'react';
 import { useAgenda } from '@/hooks/useAgenda';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -32,17 +33,15 @@ export const AgendamentoCard: React.FC<AgendamentoCardProps> = ({
 
   return (
     <div className="bg-base-900 border border-base-800 rounded-lg p-4">
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabIndex={-1}>
-        <div className="flex items-center gap-3">
-          <Avatar name={cliente} size="md" />
-          <div>
-            <p className="font-medium">{cliente}</p>
-            <p className="text-sm text-support-300">{profissional}</p>
-          </div>
+      <div className="flex items-center gap-3">
+        <Avatar name={cliente} size="md" />
+        <div>
+          <p className="font-medium">{cliente}</p>
+          <p className="text-sm text-support-300">{profissional}</p>
         </div>
-        <div className="text-right">
-          <p className="font-semibold">{horario}</p>
-        </div>
+      </div>
+      <div className="text-right">
+        <p className="font-semibold">{horario}</p>
       </div>
       <div className="flex items-center justify-between">
         <p className="text-sm text-support-200">{servico}</p>

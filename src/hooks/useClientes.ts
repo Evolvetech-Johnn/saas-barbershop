@@ -20,7 +20,7 @@ export const useClientes = () => {
     carregarClientes();
   }, [tenant]);
 
-  const criarCliente = (data: Omit<Cliente, 'id'>) => {
+  const criarCliente = (data: Omit<Cliente, 'id' | 'tenantId'>) => {
     if (!tenant) return;
     clienteService.createCliente({
       ...data,

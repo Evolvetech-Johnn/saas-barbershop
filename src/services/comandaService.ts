@@ -49,10 +49,11 @@ export const comandaService = {
       profissionalId: agendamento.profissionalId,
       comandaId: novaComanda.id,
       valor: valorComissao,
+      percentual: 10,
     });
 
     // Update agendamento status to concluido
-    agendamentoService.atualizarAgendamento(agendamento.id, { status: 'concluido' });
+    agendamentoService.updateAgendamento(agendamento.id, { status: 'concluido' });
 
     return novaComanda;
   },

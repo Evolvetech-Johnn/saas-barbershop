@@ -19,7 +19,7 @@ const getFormaPagamentoLabel = (forma: string): string => {
 
 export const FinanceiroPage: React.FC = () => {
   const { totais } = useFinanceiro()
-  const { comandas, loading: loadingComandas, carregarComandas } = useComandas()
+  const { comandas } = useComandas()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [comandaSelecionada, setComandaSelecionada] = useState<Comanda | undefined>()
 
@@ -33,7 +33,7 @@ export const FinanceiroPage: React.FC = () => {
     setIsModalOpen(true)
   }
 
-  const handleSaveComanda = (data: Omit<Comanda, 'id' | 'tenantId' | 'dataHora'>) => {
+  const handleSaveComanda = (_data: Omit<Comanda, 'id' | 'tenantId' | 'dataHora'>) => {
     // Not used in this view – creation is handled via agenda flow
   }
 

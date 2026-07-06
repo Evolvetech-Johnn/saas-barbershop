@@ -5,10 +5,8 @@ import { AgendamentoCard } from '@/components/agenda/AgendamentoCard'
 import { AgendamentoFormModal } from '@/components/agenda/AgendamentoFormModal'
 import { useAgenda } from '@/hooks/useAgenda'
 import { mockData } from '@/data/mockData'
-import { useTenant } from '@/context/TenantContext'
 
 export const AgendaPage: React.FC = () => {
-  const { tenant } = useTenant()
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { agendamentos, criarAgendamento } = useAgenda()

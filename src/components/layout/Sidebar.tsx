@@ -18,6 +18,8 @@ export const Sidebar: React.FC = () => {
   const location = useLocation();
   const { tenant, availableTenants, switchTenant } = useTenant();
 
+  if (!tenant) return null;
+
   return (
     <aside className="w-64 bg-base-900 border-r border-base-800 min-h-screen flex flex-col">
       <div className="p-4 border-b border-base-800">

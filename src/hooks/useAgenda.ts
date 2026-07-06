@@ -21,7 +21,7 @@ export const useAgenda = () => {
     carregarAgendamentos();
   }, [tenant]);
 
-  const criarAgendamento = (data: Omit<Agendamento, 'id'>) => {
+  const criarAgendamento = (data: Omit<Agendamento, 'id' | 'tenantId'>) => {
     if (!tenant) return;
     agendamentoService.createAgendamento({
       ...data,

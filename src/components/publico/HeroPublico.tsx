@@ -6,6 +6,8 @@ import { Link } from 'react-router-dom';
 export const HeroPublico: React.FC = () => {
   const { tenant } = useTenant();
 
+  if (!tenant) return null;
+
   return (
     <section className="py-20 lg:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
