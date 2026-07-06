@@ -5,7 +5,11 @@ import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/context/ToastContext';
 
-export const Topbar: React.FC = () => {
+interface TopbarProps {
+  onToggleSidebar?: () => void;
+}
+
+export const Topbar: React.FC<TopbarProps> = ({ onToggleSidebar }) => {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -17,8 +21,19 @@ export const Topbar: React.FC = () => {
   };
 
   return (
-    <header className="h-16 bg-base-900 border-b border-base-800 flex items-center justify-between px-6">
-      <div className="flex-1" />
+    <header className="h-16 bg-base-900 border-b border-base-800 flex items-center justify-between px-4 sm:px-6">
+      <div className="flex items-center gap-3">
+        {/* Mobile menu button */}
+        <button
+          onClick={onToggleSidebar}
+          className="p-2 mr-2 lg:hidden text-support-300 hover:text-support-100 hover:bg-base-800 rounded-md transition-colors"
+          aria-label="Abrir menu"
+        >
+          ☰
+        </button>
+        <div className="hidden sm:block" />
+      </div>
+
       <div className="flex items-center gap-4">
         <button className="p-2 text-support-300 hover:text-support-100 hover:bg-base-800 rounded-md transition-colors">
           🔔
