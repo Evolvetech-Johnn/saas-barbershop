@@ -4,6 +4,7 @@ import fastifyHelmet from '@fastify/helmet';
 import fastifyAutoload from '@fastify/autoload';
 import path from 'path';
 import dotenv from 'dotenv';
+import { connectDatabase, disconnectDatabase } from './config/database';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
@@ -15,6 +16,9 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 async function bootstrap() {
   try {
+    // Connect to MongoDB before starting the server
+    await connectDatabase();
+
     // Register plugins
     await server.register(fastifyCors, {
       origin: '*', // adjust in production
@@ -51,8 +55,22 @@ async function bootstrap() {
     await server.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' });
   } catch (err) {
     server.log.error(err);
+    await disconnectDatabase();
     process.exit(1);
   }
 }
 
 bootstrap();
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('[APP] SIGTERM received, shutting down gracefully');
+  await disconnectDatabase();
+  process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+  console.log('[APP] SIGINT received, shutting down gracefully');
+  await disconnectDatabase();
+  process.exit(0);
+});
