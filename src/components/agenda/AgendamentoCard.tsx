@@ -12,12 +12,7 @@ interface AgendamentoCardProps {
   status: string;
 }
 
-export const Sidebar: React.FC = () => {
-  const location = useLocation();
-  const { tenant, availableTenants, switchTenant } = useTenant();
-  if (!tenant) return null;
-  return null;
-};
+
 
 export const AgendamentoCard: React.FC<AgendamentoCardProps> = ({
   cliente,

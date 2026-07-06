@@ -48,7 +48,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" ref={modalRef}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabIndex="-1" ref={modalRef}>
       <div className="absolute inset-0 bg-black/80" onClick={onClose} />
       <div className="relative w-full max-w-lg bg-base-900 border border-base-800 rounded-lg shadow-xl">
         {title && (
