@@ -27,11 +27,11 @@ export const ClientesPage: React.FC = () => {
     setIsModalOpen(true)
   }
 
-  const handleSave = (data: Omit<Cliente, 'id' | 'tenantId'>) => {
+  const handleSave = async (data: Partial<Cliente>) => {
     if (clienteSelecionado) {
-      atualizarCliente(clienteSelecionado.id, data)
+      return atualizarCliente((clienteSelecionado as any)._id || clienteSelecionado.id, data)
     } else {
-      criarCliente(data)
+      return criarCliente(data)
     }
   }
 
@@ -64,7 +64,7 @@ export const ClientesPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {clientesFiltrados.map((cliente) => (
           <ClienteCard
-            key={cliente.id}
+            key={(cliente as any)._id || cliente.id}
             nome={cliente.nome}
             telefone={cliente.telefone}
             email={cliente.email}
@@ -72,7 +72,7 @@ export const ClientesPage: React.FC = () => {
             ultimoAtendimento={'25/06/2026'} // mock for now, ideally derived
             aniversario={cliente.dataNascimento ? new Date(cliente.dataNascimento).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}) : undefined}
             onEdit={() => handleOpenEdit(cliente)}
-            onDelete={() => handleDelete(cliente.id)}
+            onDelete={() => handleDelete((cliente as any)._id || cliente.id)}
           />
         ))}
         {clientesFiltrados.length === 0 && (

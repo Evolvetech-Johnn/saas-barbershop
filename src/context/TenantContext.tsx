@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Tenant } from '@/types/tenant';
 import { tenantService } from '@/services/tenantService';
-import { useAuth } from './AuthContext';
+
 
 interface TenantContextType {
   tenant: Tenant | null;
@@ -14,7 +14,6 @@ interface TenantContextType {
 const TenantContext = createContext<TenantContextType | undefined>(undefined);
 
 export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { usuario } = useAuth();
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [availableTenants, setAvailableTenants] = useState<Tenant[]>([]);
 
@@ -23,21 +22,14 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       const tenants = await tenantService.getAllTenants();
       setAvailableTenants(tenants);
       if (tenants.length > 0 && !tenant) {
-        setTenant(tenants[0]);
+        const adminTenant = tenants.find((t) => t.slug === 'admin');
+        setTenant(adminTenant || tenants[0]);
       }
     };
     fetchTenants();
   }, []);
 
-  // Quando o usuário loga, seleciona o tenant correspondente ao seu tenantId
-  useEffect(() => {
-    if (usuario && availableTenants.length > 0) {
-      const userTenant = availableTenants.find((t) => t.id === usuario.tenantId);
-      if (userTenant) {
-        setTenant(userTenant);
-      }
-    }
-  }, [usuario, availableTenants]);
+
 
   useEffect(() => {
     if (tenant) {
@@ -54,10 +46,12 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   const updateTenant = async (data: Partial<Tenant>) => {
     if (!tenant) return;
-    const updated = await tenantService.updateTenant(tenant.id, data);
+    const currentId = (tenant as any)._id || tenant.id;
+    const updated = await tenantService.updateTenant(currentId, data);
     if (updated) {
       setTenant(updated);
-      const updatedList = availableTenants.map(t => t.id === updated.id ? updated : t);
+      const updatedId = (updated as any)._id || updated.id;
+      const updatedList = availableTenants.map(t => ((t as any)._id || t.id) === updatedId ? updated : t);
       setAvailableTenants(updatedList);
     }
   };

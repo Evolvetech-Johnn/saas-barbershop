@@ -5,7 +5,8 @@ export interface Comissao {
   profissionalId: string;
   valor: number;
   percentual: number;
-  dataHora: Date;
+  status?: 'pendente' | 'paga';
+  dataHora: Date | string;
 }
 
 export interface ComissaoResumo {

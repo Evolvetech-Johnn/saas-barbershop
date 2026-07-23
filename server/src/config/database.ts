@@ -1,12 +1,11 @@
-import { MongoClient, Db } from 'mongodb';
+import mongoose from 'mongoose';
 
-let mongoClient: MongoClient | null = null;
-let db: Db | null = null;
+let isConnected: boolean = false;
 
-export async function connectDatabase(): Promise<Db> {
-  if (db) {
-    console.log('[DB] Using existing MongoDB connection');
-    return db;
+export async function connectDatabase(): Promise<void> {
+  if (isConnected) {
+    console.log('[DB] Using existing Mongoose connection');
+    return;
   }
 
   const mongoUri = process.env.MONGODB_URI;
@@ -19,20 +18,14 @@ export async function connectDatabase(): Promise<Db> {
   }
 
   try {
-    console.log('[DB] Connecting to MongoDB Atlas...');
-    mongoClient = new MongoClient(mongoUri, {
+    console.log('[DB] Connecting to MongoDB Atlas with Mongoose...');
+    
+    await mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 10000,
-      retryWrites: true,
     });
 
-    await mongoClient.connect();
-    db = mongoClient.db();
-
-    // Test the connection
-    const pingResult = await db.admin().ping();
-    console.log('[DB] ✓ MongoDB connection successful:', pingResult);
-
-    return db;
+    isConnected = mongoose.connection.readyState === 1;
+    console.log('[DB] ✓ Mongoose connection successful');
   } catch (error: any) {
     const errorMessage = error?.message || String(error);
     
@@ -66,22 +59,19 @@ export async function connectDatabase(): Promise<Db> {
     }
 
     console.error('[DB] Connection error:', errorMessage);
+    isConnected = false;
     throw error;
   }
 }
 
 export async function disconnectDatabase(): Promise<void> {
-  if (mongoClient) {
-    await mongoClient.close();
-    mongoClient = null;
-    db = null;
-    console.log('[DB] MongoDB connection closed');
+  if (mongoose.connection.readyState !== 0) {
+    await mongoose.disconnect();
+    isConnected = false;
+    console.log('[DB] Mongoose connection closed');
   }
 }
 
-export function getDatabase(): Db {
-  if (!db) {
-    throw new Error('[DB] Database connection not established. Call connectDatabase() first.');
-  }
-  return db;
+export function isDatabaseConnected(): boolean {
+  return isConnected;
 }

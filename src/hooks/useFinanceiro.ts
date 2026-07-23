@@ -1,12 +1,9 @@
-import { useState, useEffect } from 'react';
-import { useTenant } from '@/context/TenantContext';
-import { Comanda } from '@/types/comanda';
+import { useState, useMemo } from 'react';
+import { useComandas } from '@/hooks/useComandas';
 import { financeiroService } from '@/services/financeiroService';
 
 export const useFinanceiro = () => {
-  const { tenant } = useTenant();
-  const [comandas, setComandas] = useState<Comanda[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { comandas, loading, criarComanda, atualizarComanda, excluirComanda } = useComandas();
 
   const dataInicio = new Date();
   dataInicio.setDate(1);
@@ -19,45 +16,12 @@ export const useFinanceiro = () => {
     fim: dataFim,
   });
 
-  const carregarComandas = () => {
-    if (!tenant) return;
-    setLoading(true);
-    const dados = financeiroService.getComandasByTenant(tenant.id);
-    setComandas(dados);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    carregarComandas();
-  }, [tenant]);
-
-  const totais = tenant
-    ? financeiroService.getTotaisByPeriodo(tenant.id, periodo.inicio, periodo.fim)
-    : { total: 0, recebido: 0, areceber: 0, formasPagamento: {} as any, comandas: [] };
-
-  const criarComanda = (data: Omit<Comanda, 'id' | 'tenantId' | 'dataHora'>) => {
-    if (!tenant) return;
-    financeiroService.createComanda(tenant.id, data);
-    carregarComandas();
-  };
-
-  const atualizarComanda = (
-    comandaId: string,
-    data: Partial<Omit<Comanda, 'id' | 'tenantId'>>
-  ) => {
-    if (!tenant) return;
-    financeiroService.updateComanda(tenant.id, comandaId, data);
-    carregarComandas();
-  };
-
-  const excluirComanda = (comandaId: string) => {
-    if (!tenant) return;
-    financeiroService.deleteComanda(tenant.id, comandaId);
-    carregarComandas();
-  };
+  const totais = useMemo(() => {
+    return financeiroService.getTotaisByPeriodo(comandas, periodo.inicio, periodo.fim);
+  }, [comandas, periodo]);
 
   return {
-    comandas,
+    comandas: totais.comandas,
     loading,
     totais,
     periodo,

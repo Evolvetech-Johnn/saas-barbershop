@@ -1,26 +1,42 @@
 import { Usuario } from '@/types/usuario';
+import { apiRequest } from '@/config/api';
+
+interface LoginResponse {
+  token: string;
+  refreshToken: string;
+  user: Usuario;
+}
 
 export const authService = {
-  // Simulated login. Default role is 'cliente'.
-  // In production this should call the backend API `/api/auth/login` and return the real user payload.
-  async login(email: string, senha: string): Promise<Usuario> {
-    await new Promise(resolve => setTimeout(resolve, 800));
+  async login(email: string, password: string, tenantId?: string): Promise<LoginResponse> {
+    const response = await apiRequest<LoginResponse>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }, tenantId);
 
-    // Default to 'cliente' to avoid granting admin rights by default.
-    const papel = (email === 'admin@saas.com' && senha === 'admin123') ? 'admin' : 'cliente';
+    localStorage.setItem('authToken', response.token);
+    localStorage.setItem('refreshToken', response.refreshToken);
 
-    return {
-      id: '1',
-      tenantId: '1',
-      email,
-      senha,
-      nome: papel === 'admin' ? 'Administrador' : 'Cliente',
-      papel,
-      ativo: true,
-    };
+    return response;
+  },
+
+  async refreshToken(): Promise<string> {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await apiRequest<{ token: string }>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    localStorage.setItem('authToken', response.token);
+    return response.token;
   },
 
   async logout(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 300));
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
   },
 };

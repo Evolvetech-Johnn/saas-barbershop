@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Usuario } from '@/types/usuario';
 import { authService } from '@/services/authService';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useTenant } from './TenantContext';
 
 interface AuthContextType {
   usuario: Usuario | null;
@@ -15,14 +16,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [usuario, setUsuario] = useLocalStorage<Usuario | null>('usuario', null);
   const [loading, setLoading] = useState(false);
+  const { tenant } = useTenant();
 
   const login = async (email: string, senha: string): Promise<boolean> => {
     setLoading(true);
     try {
-      // Use authService to obtain the user. authService defaults role to 'cliente' unless backend indicates otherwise.
-      const usuarioLogado = await authService.login(email, senha);
-      setUsuario(usuarioLogado);
+      const currentTenantId = tenant ? (tenant.id || (tenant as any)._id) : undefined;
+      const response = await authService.login(email, senha, currentTenantId ? String(currentTenantId) : undefined);
+      setUsuario(response.user);
     } catch (err) {
+      console.error('Erro no login:', err);
       setLoading(false);
       return false;
     }
@@ -30,7 +33,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return true;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.error('Erro no logout:', err);
+    }
     setUsuario(null);
   };
 

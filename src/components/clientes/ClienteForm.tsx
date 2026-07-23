@@ -7,7 +7,7 @@ import { Cliente } from '@/types/cliente';
 interface ClienteFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: Omit<Cliente, 'id' | 'tenantId'>) => void;
+  onSave: (data: Partial<Cliente>) => Promise<boolean>;
   cliente?: Cliente | null;
 }
 
@@ -48,11 +48,14 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
     }
   }, [cliente, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nome || !formData.telefone) return;
 
-    onSave({
+    setLoading(true);
+    const success = await onSave({
       nome: formData.nome,
       telefone: formData.telefone,
       email: formData.email || undefined,
@@ -60,8 +63,11 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
       observacoes: formData.observacoes || undefined,
       ativo: formData.ativo,
     });
+    setLoading(false);
     
-    onClose();
+    if (success) {
+      onClose();
+    }
   };
 
   return (
@@ -112,10 +118,12 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
           />
         </div>
         <div className="flex flex-col sm:flex-row gap-3 justify-end pt-4">
-          <Button type="button" variant="ghost" onClick={onClose}>
+          <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
             Cancelar
           </Button>
-          <Button type="submit">Salvar</Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Salvando...' : 'Salvar'}
+          </Button>
         </div>
       </form>
     </Modal>

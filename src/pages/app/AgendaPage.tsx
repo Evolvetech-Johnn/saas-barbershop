@@ -4,7 +4,7 @@ import { CalendarioAgenda } from '@/components/agenda/CalendarioAgenda'
 import { AgendamentoCard } from '@/components/agenda/AgendamentoCard'
 import { AgendamentoFormModal } from '@/components/agenda/AgendamentoFormModal'
 import { useAgenda } from '@/hooks/useAgenda'
-import { mockData } from '@/data/mockData'
+import { Agendamento } from '@/types/agendamento'
 
 export const AgendaPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -20,12 +20,12 @@ export const AgendaPage: React.FC = () => {
     )
   })
 
-  // Helper function to resolve names
-  const getProfissionalNome = (id: string) => {
-    return mockData.profissionais.find(p => p.id === id)?.nome || 'Profissional'
+  // Use populated fields from backend
+  const getProfissionalNome = (agendamento: Agendamento) => {
+    return agendamento.profissionalId?.nome || 'Profissional'
   }
-  const getServicoNome = (id: string) => {
-    return mockData.servicos.find(s => s.id === id)?.nome || 'Serviço'
+  const getServicoNome = (agendamento: Agendamento) => {
+    return agendamento.servicoId?.nome || 'Serviço'
   }
 
   return (
@@ -59,11 +59,11 @@ export const AgendaPage: React.FC = () => {
           <h3 className="text-lg font-semibold">Atendimentos do dia</h3>
           {agendamentosDoDia.map((agendamento) => (
             <AgendamentoCard
-              key={agendamento.id}
+              key={(agendamento as any)._id || agendamento.id}
               cliente={agendamento.clienteNome}
-              profissional={getProfissionalNome(agendamento.profissionalId)}
-              servico={getServicoNome(agendamento.servicoId)}
-              horario={new Date(agendamento.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+              profissional={getProfissionalNome(agendamento)}
+              servico={getServicoNome(agendamento)}
+              horario={new Date(agendamento.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })}
               status={agendamento.status}
             />
           ))}

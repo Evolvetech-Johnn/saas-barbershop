@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
 import { Agendamento } from '@/types/agendamento'
-import { mockData } from '@/data/mockData'
+
 
 interface ProximosAgendamentosProps {
   agendamentosHoje?: Agendamento[]
@@ -31,22 +31,22 @@ export const ProximosAgendamentos: React.FC<ProximosAgendamentosProps> = ({ agen
           <p className="text-support-300 text-sm">Nenhum agendamento para hoje.</p>
         ) : (
           agendamentosOrdenados.map(agendamento => {
-            const servico = mockData.servicos.find(s => s.id === agendamento.servicoId)
-            const profissional = mockData.profissionais.find(p => p.id === agendamento.profissionalId)
-            const nomeCliente = agendamento.clienteNome || 'Cliente não identificado'
+            const servicoNome = (agendamento.servicoId as any)?.nome || 'Serviço'
+            const profissionalNome = (agendamento.profissionalId as any)?.nome || 'Profissional'
+            const nomeCliente = (agendamento.clienteId as any)?.nome || agendamento.clienteNome || 'Cliente não identificado'
             
             const horas = new Date(agendamento.dataHora).getHours().toString().padStart(2, '0')
             const minutos = new Date(agendamento.dataHora).getMinutes().toString().padStart(2, '0')
             const horarioFormatado = `${horas}:${minutos}`
 
             return (
-              <div key={agendamento.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div key={(agendamento as any)._id || agendamento.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <Avatar name={nomeCliente} size="md" />
                   <div className="min-w-0">
                     <p className="font-medium truncate">{nomeCliente}</p>
                     <p className="text-sm text-support-300 truncate">
-                      {servico?.nome || 'Serviço'} • {profissional?.nome || 'Profissional'}
+                      {servicoNome} • {profissionalNome}
                     </p>
                   </div>
                 </div>

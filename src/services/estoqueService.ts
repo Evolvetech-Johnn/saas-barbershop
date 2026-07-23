@@ -1,45 +1,36 @@
 import { Produto } from '@/types/produto';
-import { mockData } from '@/data/mockData';
+import { apiRequest } from '@/config/api';
 
 export const estoqueService = {
-  getProdutosByTenant: (tenantId: string): Produto[] => {
-    return mockData.produtos.filter((p) => p.tenantId === tenantId);
+  getAll: async (tenantId: string): Promise<Produto[]> => {
+    return apiRequest<Produto[]>('/produtos', {
+      method: 'GET',
+    }, tenantId);
   },
 
-  getProdutoById: (tenantId: string, produtoId: string): Produto | undefined => {
-    return mockData.produtos.find((p) => p.tenantId === tenantId && p.id === produtoId);
+  getById: async (tenantId: string, id: string): Promise<Produto> => {
+    return apiRequest<Produto>(`/produtos/${id}`, {
+      method: 'GET',
+    }, tenantId);
   },
 
-  createProduto: (tenantId: string, data: Omit<Produto, 'id' | 'tenantId'>): Produto => {
-    const novoProduto: Produto = {
-      id: `prod${Date.now()}`,
-      tenantId,
-      ...data,
-    };
-    mockData.produtos.push(novoProduto);
-    return novoProduto;
+  create: async (tenantId: string, data: Partial<Produto>): Promise<Produto> => {
+    return apiRequest<Produto>('/produtos', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, tenantId);
   },
 
-  updateProduto: (tenantId: string, produtoId: string, data: Partial<Omit<Produto, 'id' | 'tenantId'>>): Produto | undefined => {
-    const index = mockData.produtos.findIndex((p) => p.tenantId === tenantId && p.id === produtoId);
-    if (index === -1) return undefined;
-
-    mockData.produtos[index] = {
-      ...mockData.produtos[index],
-      ...data,
-    };
-    return mockData.produtos[index];
+  update: async (tenantId: string, id: string, data: Partial<Produto>): Promise<Produto> => {
+    return apiRequest<Produto>(`/produtos/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }, tenantId);
   },
 
-  deleteProduto: (tenantId: string, produtoId: string): boolean => {
-    const index = mockData.produtos.findIndex((p) => p.tenantId === tenantId && p.id === produtoId);
-    if (index === -1) return false;
-
-    mockData.produtos.splice(index, 1);
-    return true;
-  },
-
-  getProdutosEstoqueBaixo: (tenantId: string): Produto[] => {
-    return mockData.produtos.filter((p) => p.tenantId === tenantId && p.quantidade <= p.quantidadeMinima);
+  delete: async (tenantId: string, id: string): Promise<{ success: boolean }> => {
+    return apiRequest<{ success: boolean }>(`/produtos/${id}`, {
+      method: 'DELETE',
+    }, tenantId);
   },
 };

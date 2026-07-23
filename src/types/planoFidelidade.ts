@@ -10,8 +10,8 @@ export interface PlanoFidelidade {
 
 export interface AssinaturaPlano {
   id: string;
-  clienteId: string;
-  planoFidelidadeId: string;
+  clienteId: any;
+  planoFidelidadeId: any;
   dataInicio: Date;
   dataFim?: Date;
   status: 'ativo' | 'cancelado';

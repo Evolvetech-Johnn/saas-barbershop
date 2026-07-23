@@ -10,7 +10,7 @@ import { useTenant } from '@/context/TenantContext';
 
 export const EstoquePage: React.FC = () => {
   const { tenant } = useTenant();
-  const { produtos, produtosEstoqueBaixo, carregarProdutos } = useEstoque();
+  const { produtos, produtosEstoqueBaixo, carregarProdutos, criarProduto, atualizarProduto } = useEstoque();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [produtoEditar, setProdutoEditar] = useState<Produto | undefined>();
 
@@ -26,17 +26,17 @@ export const EstoquePage: React.FC = () => {
 
   const handleExcluirProduto = (produtoId: string) => {
     if (tenant && window.confirm('Tem certeza que deseja excluir este produto?')) {
-      estoqueService.deleteProduto(tenant.id, produtoId);
+      estoqueService.delete(tenant.id, produtoId);
       carregarProdutos();
     }
   };
 
-  const handleSalvarProduto = (data: Omit<Produto, 'id' | 'tenantId'>) => {
+  const handleSalvarProduto = async (data: Partial<Produto>) => {
     if (!tenant) return;
     if (produtoEditar) {
-      estoqueService.updateProduto(tenant.id, produtoEditar.id, data);
+      await atualizarProduto((produtoEditar as any)._id || produtoEditar.id, data);
     } else {
-      estoqueService.createProduto(tenant.id, data);
+      await criarProduto(data);
     }
     carregarProdutos();
   };

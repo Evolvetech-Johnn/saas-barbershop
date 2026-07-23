@@ -1,67 +1,36 @@
 import { Cliente } from '@/types/cliente';
-import { mockData } from '@/data/mockData';
-
-const STORAGE_KEY = 'barbearia_clientes';
-
-// Initialize local storage with mockData if empty
-if (!localStorage.getItem(STORAGE_KEY)) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(mockData.clientes));
-}
+import { apiRequest } from '@/config/api';
 
 export const clienteService = {
-  getClientes: (): Cliente[] => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return [];
-    try {
-      const parsed = JSON.parse(stored);
-      return parsed.map((c: any) => ({
-        ...c,
-        dataNascimento: c.dataNascimento ? new Date(c.dataNascimento) : undefined
-      }));
-    } catch (e) {
-      console.error('Error parsing clientes from localStorage', e);
-      return [];
-    }
+  getAll: async (tenantId: string): Promise<Cliente[]> => {
+    return apiRequest<Cliente[]>('/clientes', {
+      method: 'GET',
+    }, tenantId);
   },
 
-  getClientesByTenant: (tenantId: string): Cliente[] => {
-    return clienteService.getClientes().filter(c => c.tenantId === tenantId && c.ativo);
+  getById: async (tenantId: string, id: string): Promise<Cliente> => {
+    return apiRequest<Cliente>(`/clientes/${id}`, {
+      method: 'GET',
+    }, tenantId);
   },
 
-  saveClientes: (clientes: Cliente[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(clientes));
+  create: async (tenantId: string, data: Partial<Cliente>): Promise<Cliente> => {
+    return apiRequest<Cliente>('/clientes', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, tenantId);
   },
 
-  createCliente: (cliente: Omit<Cliente, 'id'>): Cliente => {
-    const clientes = clienteService.getClientes();
-    const novoCliente: Cliente = {
-      ...cliente,
-      id: `c_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-    };
-    clientes.push(novoCliente);
-    clienteService.saveClientes(clientes);
-    return novoCliente;
+  update: async (tenantId: string, id: string, data: Partial<Cliente>): Promise<Cliente> => {
+    return apiRequest<Cliente>(`/clientes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }, tenantId);
   },
 
-  updateCliente: (id: string, data: Partial<Omit<Cliente, 'id' | 'tenantId'>>): Cliente | null => {
-    const clientes = clienteService.getClientes();
-    const index = clientes.findIndex(c => c.id === id);
-    if (index === -1) return null;
-
-    const updatedCliente = { ...clientes[index], ...data };
-    clientes[index] = updatedCliente;
-    clienteService.saveClientes(clientes);
-    return updatedCliente;
+  delete: async (tenantId: string, id: string): Promise<{ success: boolean }> => {
+    return apiRequest<{ success: boolean }>(`/clientes/${id}`, {
+      method: 'DELETE',
+    }, tenantId);
   },
-
-  deleteCliente: (id: string): boolean => {
-    const clientes = clienteService.getClientes();
-    const index = clientes.findIndex(c => c.id === id);
-    if (index === -1) return false;
-    
-    // Soft delete
-    clientes[index].ativo = false;
-    clienteService.saveClientes(clientes);
-    return true;
-  }
 };

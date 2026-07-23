@@ -6,6 +6,8 @@ const menuItems = [
   { path: '/app/dashboard', label: 'Dashboard', icon: '📊' },
   { path: '/app/agenda', label: 'Agenda', icon: '📅' },
   { path: '/app/clientes', label: 'Clientes', icon: '👥' },
+  { path: '/app/equipe', label: 'Equipe', icon: '✂️' },
+  { path: '/app/servicos', label: 'Serviços', icon: '💈' },
   { path: '/app/financeiro', label: 'Financeiro', icon: '💰' },
   { path: '/app/comissoes', label: 'Comissões', icon: '💵' },
   { path: '/app/estoque', label: 'Estoque', icon: '📦' },

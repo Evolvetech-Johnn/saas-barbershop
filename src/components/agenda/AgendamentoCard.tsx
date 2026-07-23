@@ -26,9 +26,9 @@ export const AgendamentoCard: React.FC<AgendamentoCardProps> = ({
   const handleConcluir = () => {
     // Find the underlying agendamento by matching fields (simplified lookup)
     const ag = agendamentos.find(
-      a => a.clienteNome === cliente && a.profissionalId === profissional && a.servicoId === servico && a.dataHora.toString() === horario,
+      a => a.clienteNome === cliente && (a.profissionalId as any)?.nome === profissional && (a.servicoId as any)?.nome === servico && new Date(a.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) === horario,
     );
-    if (ag) concluirAgendamento(ag.id);
+    if (ag) concluirAgendamento(ag);
   };
 
   return (

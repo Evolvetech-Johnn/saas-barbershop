@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { useFinanceiro } from '@/hooks/useFinanceiro'
-import { useComandas } from '@/hooks/useComandas'
+
 import { FluxoCaixaTable } from '@/components/financeiro/FluxoCaixaTable'
 import { ComandaModal } from '@/components/financeiro/ComandaModal'
 import { Comanda } from '@/types/comanda'
@@ -18,8 +18,7 @@ const getFormaPagamentoLabel = (forma: string): string => {
 }
 
 export const FinanceiroPage: React.FC = () => {
-  const { totais } = useFinanceiro()
-  const { comandas } = useComandas()
+  const { totais, comandas } = useFinanceiro()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [comandaSelecionada, setComandaSelecionada] = useState<Comanda | undefined>()
 
@@ -33,7 +32,7 @@ export const FinanceiroPage: React.FC = () => {
     setIsModalOpen(true)
   }
 
-  const handleSaveComanda = (_data: Omit<Comanda, 'id' | 'tenantId' | 'dataHora'>) => {
+  const handleSaveComanda = (_data: Partial<Comanda>) => {
     // Not used in this view – creation is handled via agenda flow
   }
 

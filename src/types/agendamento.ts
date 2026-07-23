@@ -3,9 +3,9 @@ export type StatusAgendamento = 'confirmado' | 'concluido' | 'faltou' | 'cancela
 export interface Agendamento {
   id: string;
   tenantId: string;
-  profissionalId: string;
-  clienteId?: string;
-  servicoId: string;
+  profissionalId: string | any;
+  clienteId?: string | any;
+  servicoId: string | any;
   dataHora: Date;
   duracaoMinutos?: number;
   status: StatusAgendamento;

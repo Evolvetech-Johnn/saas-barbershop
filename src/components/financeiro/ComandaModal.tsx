@@ -5,14 +5,17 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Comanda, FormaPagamento, ItemComanda } from '@/types/comanda';
 import { formatCurrency } from '@/utils/formatters';
-import { mockData } from '@/data/mockData';
+import { useClientes } from '@/hooks/useClientes';
+import { useProfissionais } from '@/hooks/useProfissionais';
+import { useServicos } from '@/hooks/useServicos';
+import { useEstoque } from '@/hooks/useEstoque';
 import { useTenant } from '@/context/TenantContext';
-
+import { usePlanos } from '@/hooks/usePlanos';
 interface ComandaModalProps {
   isOpen: boolean;
   onClose: () => void;
   comanda?: Comanda;
-  onSave?: (comanda: Omit<Comanda, 'id' | 'tenantId' | 'dataHora'>) => void;
+  onSave?: (comanda: Partial<Comanda>) => void;
 }
 
 export const ComandaModal: React.FC<ComandaModalProps> = ({
@@ -21,7 +24,13 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
   comanda,
   onSave,
 }) => {
-  const { tenant } = useTenant();
+  useTenant();
+  const { assinaturas } = usePlanos();
+  const { clientes } = useClientes();
+  const { profissionais } = useProfissionais();
+  const { servicos } = useServicos();
+  const { produtos } = useEstoque();
+
   const [clienteId, setClienteId] = useState<string>('');
   const [profissionalId, setProfissionalId] = useState<string>('');
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>('pix');
@@ -31,11 +40,10 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
   const [novoItemId, setNovoItemId] = useState<string>('');
   const [novoItemQuantidade, setNovoItemQuantidade] = useState<string>('1');
 
-  const clientes = tenant ? mockData.clientes.filter((c) => c.tenantId === tenant.id) : [];
-  const profissionais = tenant ? mockData.profissionais.filter((p) => p.tenantId === tenant.id) : [];
-  const servicos = tenant ? mockData.servicos.filter((s) => s.tenantId === tenant.id) : [];
-  const produtos = tenant ? mockData.produtos.filter((p) => p.tenantId === tenant.id) : [];
-
+  // Verifica se o cliente tem assinatura ativa
+  const assinaturaAtiva = assinaturas.find(
+    (ass) => ass.status === 'ativo' && (ass.clienteId as any)?._id === clienteId || ass.clienteId === clienteId
+  );
   useEffect(() => {
     if (comanda) {
       setClienteId(comanda.clienteId || '');
@@ -68,22 +76,22 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
     let item: ItemComanda | null = null;
 
     if (novoItemTipo === 'servico') {
-      const servico = servicos.find((s) => s.id === novoItemId);
+      const servico = servicos.find((s) => ((s as any)._id || s.id) === novoItemId);
       if (servico) {
         item = {
           tipo: 'servico',
-          itemId: servico.id,
+          itemId: ((servico as any)._id || servico.id),
           nome: servico.nome,
           quantidade,
           precoUnitario: servico.preco,
         };
       }
     } else {
-      const produto = produtos.find((p) => p.id === novoItemId);
+      const produto = produtos.find((p) => ((p as any)._id || p.id) === novoItemId);
       if (produto) {
         item = {
           tipo: 'produto',
-          itemId: produto.id,
+          itemId: ((produto as any)._id || produto.id),
           nome: produto.nome,
           quantidade,
           precoUnitario: produto.preco,
@@ -103,9 +111,19 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
   };
 
   const calcularTotal = () => {
-    const subtotal = itens.reduce((sum, item) => sum + item.precoUnitario * item.quantidade, 0);
+    let subtotal = itens.reduce((sum, item) => sum + item.precoUnitario * item.quantidade, 0);
+    
+    // Se tem assinatura, todos os SERVIÇOS saem de graça (100% desconto)
+    if (assinaturaAtiva) {
+      const totalServicos = itens
+        .filter(item => item.tipo === 'servico')
+        .reduce((sum, item) => sum + item.precoUnitario * item.quantidade, 0);
+      
+      subtotal -= totalServicos;
+    }
+
     const desc = parseFloat(desconto) || 0;
-    return subtotal - desc;
+    return Math.max(subtotal - desc, 0);
   };
 
   const handleSave = () => {
@@ -131,20 +149,33 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
       <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-support-200 mb-1">
+            <label className="flex items-center gap-2 text-sm font-medium text-support-200 mb-1">
               Cliente
+              {assinaturaAtiva && (
+                <span className="bg-[var(--tenant-accent)] text-base-950 text-xs px-2 py-0.5 rounded-full font-bold">
+                  ASSINANTE VIP
+                </span>
+              )}
             </label>
             <Select
               value={clienteId}
               onChange={(e) => setClienteId(e.target.value)}
             >
               <option value="">Selecione um cliente</option>
-              {clientes.map((cliente) => (
-                <option key={cliente.id} value={cliente.id}>
-                  {cliente.nome}
-                </option>
-              ))}
+              {clientes.map((cliente) => {
+                const id = (cliente as any)._id || cliente.id;
+                return (
+                  <option key={id} value={id}>
+                    {cliente.nome}
+                  </option>
+                )
+              })}
             </Select>
+            {assinaturaAtiva && (
+              <p className="text-xs text-[var(--tenant-accent)] mt-1">
+                Serviços possuem 100% de desconto automático.
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-support-200 mb-1">
@@ -155,11 +186,14 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
               onChange={(e) => setProfissionalId(e.target.value)}
             >
               <option value="">Selecione um profissional</option>
-              {profissionais.map((profissional) => (
-                <option key={profissional.id} value={profissional.id}>
-                  {profissional.nome}
-                </option>
-              ))}
+              {profissionais.map((profissional) => {
+                const id = (profissional as any)._id || profissional.id;
+                return (
+                  <option key={id} value={id}>
+                    {profissional.nome}
+                  </option>
+                )
+              })}
             </Select>
           </div>
         </div>
@@ -183,16 +217,22 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
               >
                 <option value="">Selecione</option>
                 {novoItemTipo === 'servico'
-                  ? servicos.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.nome} - {formatCurrency(s.preco)}
-                      </option>
-                    ))
-                  : produtos.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.nome} - {formatCurrency(p.preco)}
-                      </option>
-                    ))}
+                  ? servicos.map((s) => {
+                      const id = (s as any)._id || s.id;
+                      return (
+                        <option key={id} value={id}>
+                          {s.nome} - {formatCurrency(s.preco)}
+                        </option>
+                      )
+                    })
+                  : produtos.map((p) => {
+                      const id = (p as any)._id || p.id;
+                      return (
+                        <option key={id} value={id}>
+                          {p.nome} - {formatCurrency(p.preco)}
+                        </option>
+                      )
+                    })}
               </Select>
             </div>
             <div className="col-span-1 sm:col-span-2">

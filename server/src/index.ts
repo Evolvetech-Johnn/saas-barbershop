@@ -5,7 +5,6 @@ import fastifyAutoload from '@fastify/autoload';
 import path from 'path';
 import dotenv from 'dotenv';
 import { connectDatabase, disconnectDatabase } from './config/database';
-
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
   // Use a require import here to avoid TypeScript issues with Fastify's callable type in this project setup.
@@ -52,7 +51,7 @@ async function bootstrap() {
       return { status: 'ok' };
     });
 
-    await server.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' });
+    await server.listen({ port: Number(process.env.PORT) || 3001, host: '0.0.0.0' });
   } catch (err) {
     server.log.error(err);
     await disconnectDatabase();

@@ -3,7 +3,7 @@ import { Comanda } from '@/types/comanda';
 import { Table, TableHead, TableBody, TableRow, TableCell, TableHeader } from '@/components/ui/Table';
 import { formatCurrency, formatDateTime } from '@/utils/formatters';
 import { Button } from '@/components/ui/Button';
-import { mockData } from '@/data/mockData';
+
 
 interface FluxoCaixaTableProps {
   comandas: Comanda[];
@@ -51,14 +51,14 @@ export const FluxoCaixaTable: React.FC<FluxoCaixaTableProps> = ({
             comandas
               .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime())
               .map((comanda) => {
-                const cliente = mockData.clientes.find((c) => c.id === comanda.clienteId);
-                const profissional = mockData.profissionais.find((p) => p.id === comanda.profissionalId);
+                const clienteNome = (comanda.clienteId as any)?.nome || 'Cliente avulso';
+                const profissionalNome = (comanda.profissionalId as any)?.nome || 'Profissional não identificado';
 
                 return (
-                  <TableRow key={comanda.id}>
+                  <TableRow key={(comanda as any)._id || comanda.id}>
                     <TableCell>{formatDateTime(new Date(comanda.dataHora))}</TableCell>
-                    <TableCell>{cliente?.nome || 'Cliente não identificado'}</TableCell>
-                    <TableCell>{profissional?.nome || 'Profissional não identificado'}</TableCell>
+                    <TableCell>{clienteNome}</TableCell>
+                    <TableCell>{profissionalNome}</TableCell>
                     <TableCell>
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-base-800 text-support-200">
                         {getFormaPagamentoLabel(comanda.formaPagamento)}

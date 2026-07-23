@@ -1,41 +1,29 @@
-import { PlanoFidelidade } from '@/types/planoFidelidade';
-import { mockData } from '@/data/mockData';
+import { apiRequest } from '@/config/api';
+import { PlanoFidelidade, AssinaturaPlano } from '@/types/planoFidelidade';
 
 export const planosService = {
-  getPlanosByTenant: (tenantId: string): PlanoFidelidade[] => {
-    return mockData.planosFidelidade.filter((p) => p.tenantId === tenantId);
+  getPlanosByTenant: async (tenantId: string): Promise<PlanoFidelidade[]> => {
+    return apiRequest<PlanoFidelidade[]>('/planos', {
+      method: 'GET'
+    }, tenantId);
   },
 
-  getPlanoById: (tenantId: string, planoId: string): PlanoFidelidade | undefined => {
-    return mockData.planosFidelidade.find((p) => p.tenantId === tenantId && p.id === planoId);
+  getAssinaturas: async (tenantId: string): Promise<AssinaturaPlano[]> => {
+    return apiRequest<AssinaturaPlano[]>('/assinaturas', {
+      method: 'GET'
+    }, tenantId);
   },
 
-  createPlano: (tenantId: string, data: Omit<PlanoFidelidade, 'id' | 'tenantId'>): PlanoFidelidade => {
-    const novoPlano: PlanoFidelidade = {
-      id: `plano${Date.now()}`,
-      tenantId,
-      ...data,
-    };
-    mockData.planosFidelidade.push(novoPlano);
-    return novoPlano;
+  assinarPlano: async (tenantId: string, clienteId: string, planoFidelidadeId: string): Promise<AssinaturaPlano> => {
+    return apiRequest<AssinaturaPlano>('/assinaturas', {
+      method: 'POST',
+      body: JSON.stringify({ clienteId, planoFidelidadeId }),
+    }, tenantId);
   },
 
-  updatePlano: (tenantId: string, planoId: string, data: Partial<Omit<PlanoFidelidade, 'id' | 'tenantId'>>): PlanoFidelidade | undefined => {
-    const index = mockData.planosFidelidade.findIndex((p) => p.tenantId === tenantId && p.id === planoId);
-    if (index === -1) return undefined;
-
-    mockData.planosFidelidade[index] = {
-      ...mockData.planosFidelidade[index],
-      ...data,
-    };
-    return mockData.planosFidelidade[index];
-  },
-
-  deletePlano: (tenantId: string, planoId: string): boolean => {
-    const index = mockData.planosFidelidade.findIndex((p) => p.tenantId === tenantId && p.id === planoId);
-    if (index === -1) return false;
-
-    mockData.planosFidelidade.splice(index, 1);
-    return true;
+  cancelarAssinatura: async (tenantId: string, assinaturaId: string): Promise<AssinaturaPlano> => {
+    return apiRequest<AssinaturaPlano>(`/assinaturas/${assinaturaId}/cancelar`, {
+      method: 'PATCH',
+    }, tenantId);
   },
 };

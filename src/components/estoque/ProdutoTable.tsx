@@ -32,8 +32,10 @@ export const ProdutoTable: React.FC<ProdutoTableProps> = ({ produtos, onEdit, on
               </TableCell>
             </TableRow>
           ) : (
-            produtos.map((produto) => (
-              <TableRow key={produto.id}>
+            produtos.map((produto) => {
+              const id = (produto as any)._id || produto.id;
+              return (
+              <TableRow key={id}>
                 <TableCell className="font-medium">{produto.nome}</TableCell>
                 <TableCell>
                   <Badge variant="default">{produto.categoria}</Badge>
@@ -54,14 +56,14 @@ export const ProdutoTable: React.FC<ProdutoTableProps> = ({ produtos, onEdit, on
                       </Button>
                     )}
                     {onDelete && (
-                      <Button variant="ghost" size="sm" className="text-red-400" onClick={() => onDelete(produto.id)}>
+                      <Button variant="ghost" size="sm" className="text-red-400" onClick={() => onDelete(id)}>
                         Excluir
                       </Button>
                     )}
                   </div>
                 </TableCell>
               </TableRow>
-            ))
+            )})
           )}
         </TableBody>
       </Table>

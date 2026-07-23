@@ -9,7 +9,7 @@ interface ProdutoFormProps {
   isOpen: boolean;
   onClose: () => void;
   produto?: Produto;
-  onSave: (data: Omit<Produto, 'id' | 'tenantId'>) => void;
+  onSave: (data: Partial<Produto>) => Promise<void>;
 }
 
 export const ProdutoForm: React.FC<ProdutoFormProps> = ({ isOpen, onClose, produto, onSave }) => {
@@ -45,9 +45,12 @@ export const ProdutoForm: React.FC<ProdutoFormProps> = ({ isOpen, onClose, produ
     setAtivo(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
+    setLoading(true);
+    await onSave({
       nome,
       categoria,
       preco: parseFloat(preco) || 0,
@@ -56,6 +59,7 @@ export const ProdutoForm: React.FC<ProdutoFormProps> = ({ isOpen, onClose, produ
       quantidadeMinima: parseInt(quantidadeMinima) || 0,
       ativo,
     });
+    setLoading(false);
     onClose();
   };
 
@@ -163,11 +167,11 @@ export const ProdutoForm: React.FC<ProdutoFormProps> = ({ isOpen, onClose, produ
         </div>
 
         <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={loading}>
             Cancelar
           </Button>
-          <Button type="submit">
-            {produto ? 'Salvar Alterações' : 'Criar Produto'}
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Salvando...' : produto ? 'Salvar Alterações' : 'Criar Produto'}
           </Button>
         </div>
       </form>

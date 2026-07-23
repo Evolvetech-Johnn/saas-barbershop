@@ -18,7 +18,9 @@ import OnboardingPage from '@/pages/app/OnboardingPage';
 import { DashboardPage } from '@/pages/app/DashboardPage';
 import { AgendaPage } from '@/pages/app/AgendaPage';
 import { ClientesPage } from '@/pages/app/ClientesPage';
+import { ServicosPage } from '@/pages/app/ServicosPage';
 import { FinanceiroPage } from '@/pages/app/FinanceiroPage';
+import { EquipePage } from '@/pages/app/EquipePage';
 import { ComissoesPage } from '@/pages/app/ComissoesPage';
 import { EstoquePage } from '@/pages/app/EstoquePage';
 import { PlanosPage } from '@/pages/app/PlanosPage';
@@ -46,8 +48,17 @@ const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children
 
 const AppRoutesContent: React.FC = () => {
   const { usuario } = useAuth();
-  const { tenant } = useTenant();
-  
+  const { tenant, availableTenants, setTenant } = useTenant();
+
+  React.useEffect(() => {
+    if (usuario && availableTenants.length > 0) {
+      const userTenant = availableTenants.find((t) => ((t as any)._id || t.id) === usuario.tenantId);
+      if (userTenant) {
+        setTenant(userTenant);
+      }
+    }
+  }, [usuario, availableTenants, setTenant]);
+
   // Se o usuário está logado e o tenant carregou, verifica se o onboarding foi concluído
   const isFirstAccess = usuario && tenant && !tenant.onboardingConcluido;
 
@@ -118,6 +129,22 @@ const AppRoutesContent: React.FC = () => {
         </ProtectedRoute>
       } />
 
+      <Route path="/app/equipe" element={
+        <ProtectedRoute>
+          <AppLayout>
+            <EquipePage />
+          </AppLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/app/servicos" element={
+        <ProtectedRoute>
+          <AppLayout>
+            <ServicosPage />
+          </AppLayout>
+        </ProtectedRoute>
+      } />
+
       <Route path="/app/comissoes" element={
         <ProtectedRoute>
           <AppLayout>
@@ -175,7 +202,7 @@ const AppRoutesContent: React.FC = () => {
       <Route path="/admin/login" element={<SuperAdminLoginPage />} />
 
       <Route path="/admin/*" element={
-        <RoleBasedRoute allowedRoles={[ 'admin' ]} redirectTo="/admin/login">
+        <RoleBasedRoute allowedRoles={['admin']} redirectTo="/admin/login">
           <AdminProtectedRoute>
             <SuperAdminLayout>
               <Routes>
@@ -196,15 +223,15 @@ const AppRoutesContent: React.FC = () => {
 export const AppRoutes: React.FC = () => {
   return (
     <Router>
-      <AuthProvider>
-        <TenantProvider>
+      <TenantProvider>
+        <AuthProvider>
           <ToastProvider>
             <WhatsAppProvider>
               <AppRoutesContent />
             </WhatsAppProvider>
           </ToastProvider>
-        </TenantProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </TenantProvider>
     </Router>
   );
 };

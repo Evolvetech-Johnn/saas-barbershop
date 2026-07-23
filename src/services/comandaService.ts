@@ -1,26 +1,52 @@
 import { Comanda, FormaPagamento, ItemComanda } from '@/types/comanda';
+import { apiRequest } from '@/config/api';
 import { Agendamento } from '@/types/agendamento';
-import { mockData } from '@/data/mockData';
-import { comissoesService } from '@/services/comissoesService';
-import { agendamentoService } from '@/services/agendamentoService';
 
 export const comandaService = {
-  /** Return all comandas for a tenant */
-  getComandasByTenant: (tenantId: string): Comanda[] => {
-    return mockData.comandas.filter((c) => c.tenantId === tenantId);
+  getAll: async (tenantId: string): Promise<Comanda[]> => {
+    return apiRequest<Comanda[]>('/comandas', {
+      method: 'GET',
+    }, tenantId);
   },
 
-  /** Create a comanda from a finished agendamento */
-  createComandaFromAgendamento: (
+  getById: async (tenantId: string, id: string): Promise<Comanda> => {
+    return apiRequest<Comanda>(`/comandas/${id}`, {
+      method: 'GET',
+    }, tenantId);
+  },
+
+  create: async (tenantId: string, data: Partial<Comanda>): Promise<Comanda> => {
+    return apiRequest<Comanda>('/comandas', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, tenantId);
+  },
+
+  update: async (tenantId: string, id: string, data: Partial<Comanda>): Promise<Comanda> => {
+    return apiRequest<Comanda>(`/comandas/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }, tenantId);
+  },
+
+  delete: async (tenantId: string, id: string): Promise<{ success: boolean }> => {
+    return apiRequest<{ success: boolean }>(`/comandas/${id}`, {
+      method: 'DELETE',
+    }, tenantId);
+  },
+
+  createFromAgendamento: async (
     tenantId: string,
     agendamento: Agendamento,
     formaPagamento: FormaPagamento = 'dinheiro',
-  ): Comanda => {
-    // Build the item for the service scheduled
-    const servico = mockData.servicos.find((s) => s.id === agendamento.servicoId);
+  ): Promise<Comanda> => {
+    // A comanda is constructed and sent to the backend
+    const servico = agendamento.servicoId; // assuming it is populated
+    const servicoId = (servico as any)._id || servico.id || servico;
+
     const item: ItemComanda = {
       tipo: 'servico',
-      itemId: servico?.id ?? '',
+      itemId: servicoId,
       nome: servico?.nome ?? 'Serviço',
       quantidade: 1,
       precoUnitario: servico?.preco ?? 0,
@@ -28,57 +54,17 @@ export const comandaService = {
 
     const total = item.precoUnitario * item.quantidade;
 
-    const novaComanda: Comanda = {
-      id: `com${Date.now()}`,
-      tenantId,
-      agendamentoId: agendamento.id,
-      clienteId: agendamento.clienteId,
-      profissionalId: agendamento.profissionalId,
+    const novaComandaData: Partial<Comanda> = {
+      agendamentoId: (agendamento as any)._id || agendamento.id,
+      clienteId: (agendamento.clienteId as any)?._id || agendamento.clienteId?.id || agendamento.clienteId,
+      profissionalId: (agendamento.profissionalId as any)?._id || agendamento.profissionalId?.id || agendamento.profissionalId,
       itens: [item],
       formaPagamento,
+      desconto: 0,
       total,
       dataHora: new Date(),
     };
 
-    // Persist the new comanda
-    mockData.comandas.push(novaComanda);
-
-    // Generate commission (10% of total)
-    const valorComissao = total * 0.1;
-    comissoesService.createComissao(tenantId, {
-      profissionalId: agendamento.profissionalId,
-      comandaId: novaComanda.id,
-      valor: valorComissao,
-      percentual: 10,
-    });
-
-    // Update agendamento status to concluido
-    agendamentoService.updateAgendamento(agendamento.id, { status: 'concluido' });
-
-    return novaComanda;
-  },
-
-  /** Update a comanda */
-  updateComanda: (
-    tenantId: string,
-    comandaId: string,
-    data: Partial<Omit<Comanda, 'id' | 'tenantId'>>,
-  ): Comanda | undefined => {
-    const idx = mockData.comandas.findIndex(
-      (c) => c.tenantId === tenantId && c.id === comandaId,
-    );
-    if (idx === -1) return undefined;
-    mockData.comandas[idx] = { ...mockData.comandas[idx], ...data };
-    return mockData.comandas[idx];
-  },
-
-  /** Delete a comanda */
-  deleteComanda: (tenantId: string, comandaId: string): boolean => {
-    const idx = mockData.comandas.findIndex(
-      (c) => c.tenantId === tenantId && c.id === comandaId,
-    );
-    if (idx === -1) return false;
-    mockData.comandas.splice(idx, 1);
-    return true;
-  },
+    return comandaService.create(tenantId, novaComandaData);
+  }
 };
