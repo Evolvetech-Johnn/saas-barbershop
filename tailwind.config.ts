@@ -8,21 +8,42 @@ export default {
   theme: {
     extend: {
       colors: {
-        base: {
-          950: '#0a0a0a',
-          900: '#141414',
-          800: '#1f1f1f',
+        background: 'var(--background)',
+        surface: {
+          1: 'var(--surface-1)',
+          2: 'var(--surface-2)',
+          raised: 'var(--surface-raised)',
         },
-        support: {
-          100: '#f5f5f5',
-          200: '#e5e5e5',
-          300: '#d4d4d4',
+        border: {
+          subtle: 'var(--border-subtle)',
+          strong: 'var(--border-strong)',
         },
+        text: {
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          muted: 'var(--text-muted)',
+        },
+        accent: {
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
+        },
+        status: {
+          success: 'var(--success)',
+          warning: 'var(--warning)',
+          danger: 'var(--danger)',
+        },
+        ring: 'var(--focus-ring)',
       },
       fontFamily: {
         serif: ['Playfair Display', 'serif'],
         sans: ['Inter', 'sans-serif'],
       },
+      borderRadius: {
+        'sm': '8px',
+        'md': '10px',
+        'lg': '12px',
+        'xl': '14px',
+      }
     },
   },
   plugins: [],

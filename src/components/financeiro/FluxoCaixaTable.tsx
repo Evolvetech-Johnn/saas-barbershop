@@ -1,9 +1,9 @@
 import React from 'react';
 import { Comanda } from '@/types/comanda';
 import { Table, TableHead, TableBody, TableRow, TableCell, TableHeader } from '@/components/ui/Table';
+import { Badge } from '@/components/ui/Badge';
 import { formatCurrency, formatDateTime } from '@/utils/formatters';
 import { Button } from '@/components/ui/Button';
-
 
 interface FluxoCaixaTableProps {
   comandas: Comanda[];
@@ -25,10 +25,7 @@ export const FluxoCaixaTable: React.FC<FluxoCaixaTableProps> = ({
   onViewComanda,
 }) => {
   return (
-    <div className="bg-base-900 border border-base-800 rounded-lg">
-      <div className="p-4 border-b border-base-800">
-        <h3 className="font-semibold">Fluxo de Caixa</h3>
-      </div>
+    <div className="overflow-x-auto w-full">
       <Table>
         <TableHead>
           <TableRow>
@@ -43,8 +40,11 @@ export const FluxoCaixaTable: React.FC<FluxoCaixaTableProps> = ({
         <TableBody>
           {comandas.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-support-400 py-8">
-                Nenhuma comanda encontrada
+              <TableCell colSpan={6} className="text-center text-text-muted py-12">
+                <div className="flex flex-col items-center justify-center">
+                  <span className="text-2xl mb-2 block">💸</span>
+                  <p>Nenhuma movimentação financeira encontrada.</p>
+                </div>
               </TableCell>
             </TableRow>
           ) : (
@@ -56,25 +56,27 @@ export const FluxoCaixaTable: React.FC<FluxoCaixaTableProps> = ({
 
                 return (
                   <TableRow key={(comanda as any)._id || comanda.id}>
-                    <TableCell>{formatDateTime(new Date(comanda.dataHora))}</TableCell>
+                    <TableCell className="font-medium text-text-primary">
+                      {formatDateTime(new Date(comanda.dataHora))}
+                    </TableCell>
                     <TableCell>{clienteNome}</TableCell>
                     <TableCell>{profissionalNome}</TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-base-800 text-support-200">
+                      <Badge variant="default">
                         {getFormaPagamentoLabel(comanda.formaPagamento)}
-                      </span>
+                      </Badge>
                     </TableCell>
-                    <TableCell className="font-semibold">
+                    <TableCell className="font-semibold text-text-primary">
                       {formatCurrency(comanda.total)}
                     </TableCell>
                     <TableCell className="text-right">
                       {onViewComanda && (
                         <Button
-                          variant="secondary"
+                          variant="ghost"
                           size="sm"
                           onClick={() => onViewComanda(comanda)}
                         >
-                          Ver
+                          Ver Detalhes
                         </Button>
                       )}
                     </TableCell>

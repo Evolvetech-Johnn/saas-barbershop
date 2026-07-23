@@ -1,21 +1,33 @@
-import React from 'react'
-import { useTenant } from '@/context/TenantContext'
-import { KpiCard } from '@/components/dashboard/KpiCard'
-import { ProximosAgendamentos } from '@/components/dashboard/ProximosAgendamentos'
-import { useDashboard } from '@/hooks/useDashboard'
-import { formatCurrency } from '@/utils/formatters'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import React from 'react';
+import { useTenant } from '@/context/TenantContext';
+import { ProximosAgendamentos } from '@/components/dashboard/ProximosAgendamentos';
+import { useDashboard } from '@/hooks/useDashboard';
+import { formatCurrency } from '@/utils/formatters';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Stat } from '@/components/ui/Stat';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Users, Calendar, DollarSign, Activity } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export const DashboardPage: React.FC = () => {
-  const { tenant } = useTenant()
-  const { stats, loading } = useDashboard()
+  const { tenant } = useTenant();
+  const { stats, loading } = useDashboard();
 
   if (loading || !stats) {
     return (
-      <div className="flex items-center justify-center h-full min-h-[50vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--tenant-accent)]"></div>
+      <div className="space-y-6">
+        <PageHeader title="Visão Geral" description="Carregando seus indicadores..." />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-[104px] rounded-xl" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="lg:col-span-2 h-[400px] rounded-xl" />
+          <Skeleton className="lg:col-span-1 h-[400px] rounded-xl" />
+        </div>
       </div>
-    )
+    );
   }
 
   const { agendamentosHoje, faturamentoHoje, totalClientes, taxaComparecimento, faturamentoSemanal } = stats;
@@ -23,9 +35,9 @@ export const DashboardPage: React.FC = () => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-base-900 border border-base-800 p-3 rounded-lg shadow-xl">
-          <p className="text-support-200 mb-1">{new Date(label).toLocaleDateString('pt-BR')}</p>
-          <p className="font-bold text-[var(--tenant-accent)]">
+        <div className="bg-surface-2 border border-border-strong p-3 rounded-lg shadow-xl">
+          <p className="text-text-secondary text-sm mb-1">{new Date(label).toLocaleDateString('pt-BR')}</p>
+          <p className="font-bold text-accent">
             {formatCurrency(payload[0].value)}
           </p>
         </div>
@@ -35,76 +47,75 @@ export const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-serif font-bold mb-2">
-          Olá, {tenant?.nome ?? 'Barbearia'}!
-        </h1>
-        <p className="text-support-300">Aqui está o resumo do seu dia</p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader 
+        title={`Olá, ${tenant?.nome ?? 'Barbearia'}!`} 
+        description="Aqui está o resumo da sua operação hoje." 
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard
-          title="Agendamentos Hoje"
-          value={agendamentosHoje.length.toString()}
-          change="Atualizado agora"
-          icon="📅"
+        <Stat
+          label="Agendamentos Hoje"
+          value={agendamentosHoje.length}
+          trend={12} // Mock trend for visualization
+          icon={<Calendar className="w-5 h-5" />}
         />
-        <KpiCard
-          title="Faturamento Hoje"
+        <Stat
+          label="Faturamento Hoje"
           value={formatCurrency(faturamentoHoje)}
-          change="Atualizado agora"
-          icon="💰"
+          trend={-5} // Mock trend
+          icon={<DollarSign className="w-5 h-5" />}
         />
-        <KpiCard
-          title="Total de Clientes"
-          value={totalClientes.toString()}
-          change="Atualizado agora"
-          icon="👥"
+        <Stat
+          label="Total de Clientes"
+          value={totalClientes}
+          trend={8} // Mock trend
+          icon={<Users className="w-5 h-5" />}
         />
-        <KpiCard
-          title="Taxa de Comparecimento"
+        <Stat
+          label="Taxa de Comparecimento"
           value={`${taxaComparecimento}%`}
-          change="Baseado nos agendamentos de hoje"
-          icon="✅"
+          trend={2} // Mock trend
+          icon={<Activity className="w-5 h-5" />}
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          
-          <div className="bg-base-900 border border-base-800 rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold mb-6">Faturamento Semanal</h3>
+          <div className="bg-surface-1 border border-border-subtle rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-serif font-semibold text-text-primary">Evolução do Faturamento</h3>
+            </div>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={faturamentoSemanal} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorFaturamento" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--tenant-accent)" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="var(--tenant-accent)" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <XAxis 
                     dataKey="date" 
                     tickFormatter={(val) => new Date(val).toLocaleDateString('pt-BR', { weekday: 'short' })} 
-                    stroke="var(--color-support-400)" 
+                    stroke="var(--text-muted)" 
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
                   />
                   <YAxis 
                     tickFormatter={(val) => `R$ ${val}`} 
-                    stroke="var(--color-support-400)" 
+                    stroke="var(--text-muted)" 
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
                   />
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-base-800)" vertical={false} />
-                  <Tooltip content={<CustomTooltip />} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--border-strong)', strokeWidth: 1, strokeDasharray: '3 3' }} />
                   <Area 
                     type="monotone" 
                     dataKey="amount" 
-                    stroke="var(--tenant-accent)" 
+                    stroke="var(--accent)" 
                     strokeWidth={3}
                     fillOpacity={1} 
                     fill="url(#colorFaturamento)" 
@@ -113,49 +124,11 @@ export const DashboardPage: React.FC = () => {
               </ResponsiveContainer>
             </div>
           </div>
-
-          <ProximosAgendamentos agendamentosHoje={agendamentosHoje} />
         </div>
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-base-900/50 backdrop-blur-md border border-base-800 rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold mb-4 text-support-100 flex items-center gap-2">
-              <span className="text-xl">🎂</span> Aniversariantes do Mês
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-base-800/50 rounded-lg border border-base-700/50">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-primary/80 to-brand-primary flex items-center justify-center font-bold text-white shadow-lg">
-                  JS
-                </div>
-                <div>
-                  <p className="font-medium">João Silva</p>
-                  <p className="text-xs text-support-300">12/07 - Faz 32 anos</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-base-800/50 rounded-lg border border-base-700/50">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-primary/80 to-brand-primary flex items-center justify-center font-bold text-white shadow-lg">
-                  MS
-                </div>
-                <div>
-                  <p className="font-medium">Maria Santos</p>
-                  <p className="text-xs text-support-300">18/07 - Faz 28 anos</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-base-800/50 rounded-lg border border-base-700/50 opacity-70">
-                <div className="w-10 h-10 rounded-full bg-base-700 flex items-center justify-center font-bold text-support-200">
-                  PC
-                </div>
-                <div>
-                  <p className="font-medium">Pedro Costa</p>
-                  <p className="text-xs text-support-400">25/07 - Faz 45 anos</p>
-                </div>
-              </div>
-              <button className="w-full mt-2 py-2 text-sm text-[var(--tenant-accent)] hover:text-white transition-colors font-medium">
-                Ver todos os aniversariantes →
-              </button>
-            </div>
-          </div>
+          <ProximosAgendamentos agendamentosHoje={agendamentosHoje} />
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

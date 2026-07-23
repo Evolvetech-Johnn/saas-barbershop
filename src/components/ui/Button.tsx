@@ -1,37 +1,54 @@
 import React from 'react';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends Omit<HTMLMotionProps<"button">, 'ref'> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'success' | 'danger';
   size?: 'sm' | 'md' | 'lg';
+  isLoading?: boolean;
 }
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   variant = 'primary',
   size = 'md',
   className = '',
+  isLoading = false,
+  children,
+  disabled,
   ...props
-}) => {
-  const baseClasses = 'inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-base-950 disabled:opacity-50 disabled:cursor-not-allowed';
+}, ref) => {
+  const baseClasses = 'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variantClasses = {
-    primary: 'bg-[var(--tenant-accent)] text-base-950 hover:brightness-110 focus:ring-[var(--tenant-accent)]',
-    secondary: 'bg-base-800 text-support-100 hover:bg-base-700 focus:ring-support-200',
-    outline: 'border-2 border-[var(--tenant-accent)] text-[var(--tenant-accent)] hover:bg-[var(--tenant-accent)] hover:text-base-950 focus:ring-[var(--tenant-accent)]',
-    ghost: 'text-support-100 hover:bg-base-800 focus:ring-support-200',
-    success: 'bg-green-600 text-white hover:brightness-110 focus:ring-green-600',
-    danger: 'bg-red-600 text-white hover:brightness-110 focus:ring-red-600',
+    primary: 'bg-accent text-background hover:bg-accent-hover focus-visible:ring-ring',
+    secondary: 'bg-surface-2 text-text-primary hover:bg-surface-raised focus-visible:ring-ring border border-border-subtle',
+    outline: 'border border-border-strong text-text-primary hover:bg-surface-2 focus-visible:ring-ring',
+    ghost: 'text-text-secondary hover:bg-surface-2 hover:text-text-primary focus-visible:ring-ring',
+    success: 'bg-status-success text-white hover:opacity-90 focus-visible:ring-status-success',
+    danger: 'bg-status-danger text-white hover:opacity-90 focus-visible:ring-status-danger',
   };
   
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm rounded',
-    md: 'px-4 py-2 rounded-md',
-    lg: 'px-6 py-3 rounded-lg text-lg',
+    sm: 'min-h-[36px] px-3 py-1.5 text-sm rounded-sm',
+    md: 'min-h-[44px] px-4 py-2 text-sm rounded-md',
+    lg: 'min-h-[48px] px-6 py-3 text-base rounded-lg',
   };
 
   return (
-    <button
+    <motion.button
+      ref={ref}
+      whileHover={{ scale: disabled || isLoading ? 1 : 1.02 }}
+      whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
+      transition={{ duration: 0.1, ease: 'easeOut' }}
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      disabled={disabled || isLoading}
       {...props}
-    />
+    >
+      {isLoading ? (
+        <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+      ) : null}
+      {children as React.ReactNode}
+    </motion.button>
   );
-};
+});
+
+Button.displayName = 'Button';

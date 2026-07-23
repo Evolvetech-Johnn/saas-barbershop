@@ -4,6 +4,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { statusLabels } from '@/components/agenda/statusLabels';
+import { motion } from 'framer-motion';
 
 interface AgendamentoCardProps {
   cliente: string;
@@ -12,8 +13,6 @@ interface AgendamentoCardProps {
   horario: string;
   status: string;
 }
-
-
 
 export const AgendamentoCard: React.FC<AgendamentoCardProps> = ({
   cliente,
@@ -26,28 +25,29 @@ export const AgendamentoCard: React.FC<AgendamentoCardProps> = ({
   const handleConcluir = () => {
     // Find the underlying agendamento by matching fields (simplified lookup)
     const ag = agendamentos.find(
-      a => a.clienteNome === cliente && (a.profissionalId as any)?.nome === profissional && (a.servicoId as any)?.nome === servico && new Date(a.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) === horario,
+      a => (a.clienteNome === cliente || (a.clienteId as any)?.nome === cliente) && 
+           (a.profissionalId as any)?.nome === profissional && 
+           (a.servicoId as any)?.nome === servico && 
+           new Date(a.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) === horario
     );
     if (ag) concluirAgendamento(ag);
   };
 
   return (
-    <div className="bg-base-900 border border-base-800 rounded-lg p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+    <motion.div 
+      whileHover={{ y: -2 }}
+      className="bg-surface-1 border border-border-subtle rounded-lg p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
+    >
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent/20" />
+      <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 pl-2">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <Avatar name={cliente} size="md" />
           <div className="truncate">
-            <p className="font-medium truncate">{cliente}</p>
-            <p className="text-sm text-support-300 truncate">{profissional}</p>
+            <p className="font-medium text-text-primary truncate">{cliente}</p>
+            <p className="text-xs text-text-muted truncate">{servico}</p>
           </div>
         </div>
-        <div className="mt-2 sm:mt-0 text-right">
-          <p className="font-semibold">{horario}</p>
-        </div>
-      </div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-3 gap-3">
-        <p className="text-sm text-support-200 truncate">{servico}</p>
-        <div className="flex items-center gap-2">
+        <div className="mt-2 sm:mt-0 flex flex-col items-start sm:items-end shrink-0 gap-1.5">
           <Badge
             variant={
               status === 'confirmado'
@@ -59,15 +59,21 @@ export const AgendamentoCard: React.FC<AgendamentoCardProps> = ({
                 : 'warning'
             }
           >
-            {statusLabels[status]}
+            {statusLabels[status] || status}
           </Badge>
-          {status === 'confirmado' && (
-            <Button variant="success" size="sm" onClick={handleConcluir}>
-              Concluir
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-lg font-serif text-text-primary">{horario}</span>
+          </div>
         </div>
       </div>
-    </div>
+      
+      {status === 'confirmado' && (
+        <div className="mt-4 pt-3 border-t border-border-subtle flex justify-end">
+          <Button variant="success" size="sm" onClick={handleConcluir}>
+            Concluir Atendimento
+          </Button>
+        </div>
+      )}
+    </motion.div>
   );
 };
