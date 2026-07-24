@@ -1,7 +1,17 @@
-import React from 'react'
-import { AgendamentoPublicoForm } from '@/components/publico/AgendamentoPublicoForm'
+import React from 'react';
+import { AgendamentoPublicoForm } from '@/components/publico/AgendamentoPublicoForm';
+import { useTenant } from '@/context/TenantContext';
+import { usePublicSeo } from '@/hooks/usePublicSeo';
 
 export const AgendamentoPublicoPage: React.FC = () => {
+  const { tenant } = useTenant();
+
+  usePublicSeo({
+    title: tenant ? `Agendamento - ${tenant.nome}` : 'Agendamento',
+    description: `Agende seu horário na ${tenant?.nome || 'nossa barbearia'}.`,
+    logoUrl: tenant?.logoUrl,
+  });
+
   return (
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

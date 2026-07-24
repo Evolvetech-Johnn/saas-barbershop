@@ -2,12 +2,29 @@ import React from 'react';
 import { HeroPublico } from '@/components/publico/HeroPublico';
 import { ServicosPublicos } from '@/components/publico/ServicosPublicos';
 import { ProfissionaisPublicos } from '@/components/publico/ProfissionaisPublicos';
+import { PromocoesPublicas } from '@/components/publico/PromocoesPublicas';
+import { ConteudoInformativoPublico } from '@/components/publico/ConteudoInformativoPublico';
+import { useTenant } from '@/context/TenantContext';
+import { usePublicSeo } from '@/hooks/usePublicSeo';
+import { useLocalBusinessSchema } from '@/hooks/useLocalBusinessSchema';
 
 export const PaginaPublicaPage: React.FC = () => {
+  const { tenant } = useTenant();
+
+  usePublicSeo({
+    title: tenant ? `${tenant.nome} | Barbearia` : 'Barbearia',
+    description: tenant?.descricaoPublica || 'Barbearia',
+    logoUrl: tenant?.logoUrl,
+  });
+
+  useLocalBusinessSchema(tenant);
+
   return (
     <>
       <HeroPublico />
       <ServicosPublicos />
+      <PromocoesPublicas />
+      <ConteudoInformativoPublico />
       <ProfissionaisPublicos />
       <section id="contato" className="py-20 bg-base-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

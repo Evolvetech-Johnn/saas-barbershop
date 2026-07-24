@@ -110,6 +110,7 @@ export const AgendaPage: React.FC = () => {
                         .map((agendamento) => (
                           <AgendamentoCard
                             key={(agendamento as any)._id || agendamento.id}
+                            id={(agendamento as any)._id || agendamento.id}
                             cliente={agendamento.clienteNome || 'Cliente não identificado'}
                             profissional={col.nome}
                             servico={getServicoNome(agendamento)}

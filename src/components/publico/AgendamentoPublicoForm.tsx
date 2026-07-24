@@ -53,7 +53,8 @@ export const AgendamentoPublicoForm: React.FC = () => {
     dataHora.setHours(horas, minutos, 0, 0);
 
     try {
-      await agendamentoService.create(tenant.id, {
+      const currentTenantId = (tenant as any)._id || tenant.id;
+      await agendamentoService.create(currentTenantId, {
         clienteNome: formData.nome,
         clienteTelefone: formData.telefone,
         clienteEmail: formData.email,
@@ -113,7 +114,7 @@ export const AgendamentoPublicoForm: React.FC = () => {
                 <div className="flex items-start gap-2">
                   <UserIcon className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                   <p className="font-medium text-text-primary">
-                    {profissionais.find((p) => p.id === formData.profissional)?.nome}
+                    {profissionais.find((p) => ((p as any)._id || p.id) === formData.profissional)?.nome}
                   </p>
                 </div>
               ) : (
@@ -160,10 +161,10 @@ export const AgendamentoPublicoForm: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {servicos.map((servico) => (
                   <button
-                    key={servico.id}
-                    onClick={() => setFormData({ ...formData, servico: servico.id })}
+                    key={(servico as any)._id || servico.id}
+                    onClick={() => setFormData({ ...formData, servico: (servico as any)._id || servico.id })}
                     className={`p-4 rounded-xl border text-left transition-all ${
-                      formData.servico === servico.id
+                      formData.servico === ((servico as any)._id || servico.id)
                         ? 'border-accent bg-accent/5 ring-1 ring-accent'
                         : 'border-border-subtle bg-surface-1 hover:border-border-strong hover:bg-surface-2'
                     }`}
@@ -194,16 +195,16 @@ export const AgendamentoPublicoForm: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {profissionais.map((profissional) => (
                   <button
-                    key={profissional.id}
-                    onClick={() => setFormData({ ...formData, profissional: profissional.id, horario: '' })}
+                    key={(profissional as any)._id || profissional.id}
+                    onClick={() => setFormData({ ...formData, profissional: (profissional as any)._id || profissional.id, horario: '' })}
                     className={`p-4 rounded-xl border text-left transition-all flex items-center gap-4 ${
-                      formData.profissional === profissional.id
+                      formData.profissional === ((profissional as any)._id || profissional.id)
                         ? 'border-accent bg-accent/5 ring-1 ring-accent'
                         : 'border-border-subtle bg-surface-1 hover:border-border-strong hover:bg-surface-2'
                     }`}
                   >
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
-                      formData.profissional === profissional.id ? 'bg-accent/20 text-accent' : 'bg-surface-2 text-text-muted'
+                      formData.profissional === ((profissional as any)._id || profissional.id) ? 'bg-accent/20 text-accent' : 'bg-surface-2 text-text-muted'
                     }`}>
                       <UserIcon className="w-6 h-6" />
                     </div>

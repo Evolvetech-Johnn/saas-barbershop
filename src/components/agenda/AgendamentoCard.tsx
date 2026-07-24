@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAgenda } from '@/hooks/useAgenda';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { statusLabels } from '@/components/agenda/statusLabels';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 
 interface AgendamentoCardProps {
+  id: string;
   cliente: string;
   profissional: string;
   servico: string;
@@ -15,22 +18,27 @@ interface AgendamentoCardProps {
 }
 
 export const AgendamentoCard: React.FC<AgendamentoCardProps> = ({
+  id,
   cliente,
   profissional,
   servico,
   horario,
   status,
 }) => {
-  const { agendamentos, concluirAgendamento } = useAgenda();
+  const { agendamentos, concluirAgendamento, atualizarAgendamento } = useAgenda();
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [motivo, setMotivo] = useState('');
+
   const handleConcluir = () => {
-    // Find the underlying agendamento by matching fields (simplified lookup)
-    const ag = agendamentos.find(
-      a => (a.clienteNome === cliente || (a.clienteId as any)?.nome === cliente) && 
-           (a.profissionalId as any)?.nome === profissional && 
-           (a.servicoId as any)?.nome === servico && 
-           new Date(a.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) === horario
-    );
+    const ag = agendamentos.find(a => ((a as any)._id || a.id) === id);
     if (ag) concluirAgendamento(ag);
+  };
+
+  const handleConfirmarCancelamento = async () => {
+    if (!motivo.trim()) return;
+    await atualizarAgendamento(id, { status: 'cancelado', observacoes: motivo });
+    setIsCanceling(false);
+    setMotivo('');
   };
 
   return (
@@ -67,13 +75,46 @@ export const AgendamentoCard: React.FC<AgendamentoCardProps> = ({
         </div>
       </div>
       
-      {status === 'confirmado' && (
-        <div className="mt-4 pt-3 border-t border-border-subtle flex justify-end">
+      {status === 'confirmado' && !isCanceling && (
+        <div className="mt-4 pt-3 border-t border-border-subtle flex justify-end gap-2">
+          <Button variant="danger" size="sm" onClick={() => setIsCanceling(true)} className="bg-transparent text-status-error hover:bg-status-error/10 border border-status-error/20">
+            <X className="w-4 h-4 mr-1" /> Cancelar
+          </Button>
           <Button variant="success" size="sm" onClick={handleConcluir}>
             Concluir Atendimento
           </Button>
         </div>
       )}
+
+      <AnimatePresence>
+        {isCanceling && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="mt-4 pt-3 border-t border-border-subtle space-y-3 overflow-hidden"
+          >
+            <div>
+              <label className="block text-xs font-medium text-text-secondary mb-1">Motivo do cancelamento</label>
+              <Input 
+                value={motivo}
+                onChange={(e) => setMotivo(e.target.value)}
+                placeholder="Ex: Cliente desmarcou, imprevisto..."
+                autoFocus
+                className="text-sm h-9"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setIsCanceling(false)}>
+                Voltar
+              </Button>
+              <Button variant="danger" size="sm" onClick={handleConfirmarCancelamento} disabled={!motivo.trim()}>
+                Confirmar
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

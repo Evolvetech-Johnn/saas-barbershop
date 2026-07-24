@@ -16,6 +16,7 @@
     "@fastify/helmet": "^11.1.1",
     "@fastify/jwt": "^8.0.1",
     "@prisma/client": "^5.10.0",
+    "@supabase/supabase-js": "^2.110.8",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.5.0",
     "dotenv": "^16.3.1",
