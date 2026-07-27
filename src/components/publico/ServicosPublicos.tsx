@@ -1,6 +1,9 @@
 import React from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Link } from 'react-router-dom';
+import { useTenant } from '@/context/TenantContext';
+import { FadeIn } from './FadeIn';
 
 const services = [
   {
@@ -42,29 +45,35 @@ const services = [
 ];
 
 export const ServicosPublicos: React.FC = () => {
+  const { tenant } = useTenant();
+
   return (
     <section id="servicos" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <FadeIn className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4 text-foreground">Nossos Serviços</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Oferecemos serviços de qualidade com profissionais qualificados.
           </p>
-        </div>
+        </FadeIn>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((service, index) => (
-            <Card key={index} className="p-6 bg-card hover:border-accent/30 transition-colors border-border">
-              <div className="text-accent mb-4">{service.icon}</div>
-              <h3 className="text-xl font-heading font-semibold mb-2 text-foreground">{service.title}</h3>
-              <p className="text-muted-foreground text-sm mb-4">{service.description}</p>
-              <div className="flex items-center justify-between pt-4 border-t border-border">
-                <div>
-                  <p className="text-2xl font-bold text-accent">{service.price}</p>
-                  <p className="text-xs text-muted-foreground">{service.duration}</p>
+            <FadeIn key={index} delay={index * 0.1}>
+              <Card className="p-6 bg-card hover:border-accent/30 transition-colors border-border h-full flex flex-col">
+                <div className="text-accent mb-4">{service.icon}</div>
+                <h3 className="text-xl font-heading font-semibold mb-2 text-foreground">{service.title}</h3>
+                <p className="text-muted-foreground text-sm mb-4 flex-grow">{service.description}</p>
+                <div className="flex items-center justify-between pt-4 border-t border-border mt-auto">
+                  <div>
+                    <p className="text-2xl font-bold text-accent">{service.price}</p>
+                    <p className="text-xs text-muted-foreground">{service.duration}</p>
+                  </div>
+                  <Link to={tenant ? `/${tenant.slug}/agendar` : '#'}>
+                    <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-accent hover:text-background border">Agendar</Button>
+                  </Link>
                 </div>
-                <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-accent hover:text-background border">Agendar</Button>
-              </div>
-            </Card>
+              </Card>
+            </FadeIn>
           ))}
         </div>
       </div>

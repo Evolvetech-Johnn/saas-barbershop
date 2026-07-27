@@ -216,6 +216,9 @@ const AppRoutesContent: React.FC = () => {
           </AdminProtectedRoute>
         </RoleBasedRoute>
       } />
+
+      {/* Fallback para rotas não encontradas */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

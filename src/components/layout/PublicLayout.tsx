@@ -54,9 +54,6 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
               <Link to={`/${tenant.slug}/#contato`} className="text-support-200 hover:text-[var(--tenant-accent)] transition-colors">
                 Contato
               </Link>
-              <Link to={`/${tenant.slug}/app/comissoes`} className="text-support-200 hover:text-[var(--tenant-accent)] transition-colors">
-                Comissões
-              </Link>
             </nav>
             <Link to={`/${tenant.slug}/agendar`}>
               <Button>Agendar Agora</Button>

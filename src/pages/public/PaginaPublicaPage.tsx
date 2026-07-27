@@ -9,6 +9,7 @@ import { usePublicSeo } from '@/hooks/usePublicSeo';
 import { useLocalBusinessSchema } from '@/hooks/useLocalBusinessSchema';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
+import { FadeIn } from '@/components/publico/FadeIn';
 
 export const PaginaPublicaPage: React.FC = () => {
   const { tenant } = useTenant();
@@ -31,14 +32,14 @@ export const PaginaPublicaPage: React.FC = () => {
       
       <section id="contato" className="py-20 bg-background border-t border-border/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <FadeIn className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">Entre em Contato</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Estamos aqui para atendê-lo.
             </p>
-          </div>
+          </FadeIn>
           <div className="grid md:grid-cols-2 gap-12">
-            <div>
+            <FadeIn delay={0.1}>
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
@@ -68,22 +69,22 @@ export const PaginaPublicaPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="aspect-video rounded-lg overflow-hidden border border-border">
+            </FadeIn>
+            <FadeIn delay={0.2} className="aspect-video rounded-lg overflow-hidden border border-border">
               <div className="w-full h-full bg-card flex items-center justify-center text-muted-foreground">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
               </div>
-            </div>
+            </FadeIn>
           </div>
           
-          <div className="mt-16 text-center border-t border-border pt-12">
+          <FadeIn delay={0.3} className="mt-16 text-center border-t border-border pt-12">
             <h3 className="text-2xl font-heading font-bold mb-6">Pronto para o seu novo visual?</h3>
             <Link to={tenant ? `/${tenant.slug}/agendar` : '#'}>
               <Button size="lg" className="bg-accent text-background hover:bg-accent/90">
                 Agendar Agora
               </Button>
             </Link>
-          </div>
+          </FadeIn>
         </div>
       </section>
     </div>
