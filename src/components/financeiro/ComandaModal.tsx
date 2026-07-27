@@ -11,6 +11,7 @@ import { useServicos } from '@/hooks/useServicos';
 import { useEstoque } from '@/hooks/useEstoque';
 import { useTenant } from '@/context/TenantContext';
 import { usePlanos } from '@/hooks/usePlanos';
+import { useToast } from '@/context/ToastContext';
 interface ComandaModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,6 +29,7 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
   const { assinaturas } = usePlanos();
   const { clientes } = useClientes();
   const { profissionais } = useProfissionais();
+  const { addToast } = useToast();
   const { servicos } = useServicos();
   const { produtos } = useEstoque();
 
@@ -127,7 +129,14 @@ export const ComandaModal: React.FC<ComandaModalProps> = ({
   };
 
   const handleSave = () => {
-    if (!profissionalId || itens.length === 0) return;
+    if (!profissionalId) {
+      addToast('Selecione um profissional antes de salvar.', 'warning');
+      return;
+    }
+    if (itens.length === 0) {
+      addToast('Adicione pelo menos um item (serviço ou produto) à comanda.', 'warning');
+      return;
+    }
 
     onSave?.({
       clienteId: clienteId || undefined,
