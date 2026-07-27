@@ -16,7 +16,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Search
+  Search,
+  Megaphone
 } from 'lucide-react';
 
 const menuGroups = [
@@ -40,6 +41,7 @@ const menuGroups = [
   {
     label: 'Crescimento',
     items: [
+      { path: '/app/marketing', label: 'Marketing', icon: Megaphone },
       { path: '/app/planos', label: 'Planos', icon: ClipboardList },
       { path: '/app/comissoes', label: 'Comissões', icon: Banknote },
       { path: '/app/relatorios', label: 'Relatórios', icon: LineChart },

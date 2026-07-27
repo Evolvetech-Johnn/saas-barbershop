@@ -25,6 +25,7 @@ import { ComissoesPage } from '@/pages/app/ComissoesPage';
 import { EstoquePage } from '@/pages/app/EstoquePage';
 import { PlanosPage } from '@/pages/app/PlanosPage';
 import { ConfiguracoesPage } from '@/pages/app/ConfiguracoesPage';
+import { MarketingPage } from '@/pages/app/marketing/MarketingPage';
 
 // Super Admin Pages
 import { SuperAdminLoginPage } from '@/pages/superadmin/SuperAdminLoginPage';
@@ -170,6 +171,13 @@ const AppRoutesContent: React.FC = () => {
         <ProtectedRoute>
           <AppLayout>
             <RelatoriosPage />
+          </AppLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/app/marketing" element={
+        <ProtectedRoute>
+          <AppLayout>
+            <MarketingPage />
           </AppLayout>
         </ProtectedRoute>
       } />

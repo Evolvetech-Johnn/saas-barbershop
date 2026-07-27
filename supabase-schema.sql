@@ -13,6 +13,8 @@ CREATE TABLE promocoes (
   data_inicio TIMESTAMP WITH TIME ZONE NOT NULL,
   data_fim TIMESTAMP WITH TIME ZONE NOT NULL,
   ativo BOOLEAN DEFAULT TRUE,
+  is_sugestao BOOLEAN DEFAULT FALSE,
+  desconto_sugerido INTEGER,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -22,6 +24,10 @@ ALTER TABLE promocoes ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Acesso público de leitura por tenant (promocoes)" ON promocoes
   FOR SELECT USING (true); -- Controle será feito via backend/Fastify buscando por tenant_id
+
+-- ATENÇÃO: Caso já tenha criado a tabela promocoes, execute apenas isto:
+-- ALTER TABLE promocoes ADD COLUMN IF NOT EXISTS is_sugestao BOOLEAN DEFAULT FALSE;
+-- ALTER TABLE promocoes ADD COLUMN IF NOT EXISTS desconto_sugerido INTEGER;
 
 -- Tabela de Conteúdos Informativos
 CREATE TABLE conteudos_publicos (

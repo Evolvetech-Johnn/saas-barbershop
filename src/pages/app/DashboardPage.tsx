@@ -57,25 +57,21 @@ export const DashboardPage: React.FC = () => {
         <Stat
           label="Agendamentos Hoje"
           value={agendamentosHoje.length}
-          trend={12} // Mock trend for visualization
           icon={<Calendar className="w-5 h-5" />}
         />
         <Stat
           label="Faturamento Hoje"
           value={formatCurrency(faturamentoHoje)}
-          trend={-5} // Mock trend
           icon={<DollarSign className="w-5 h-5" />}
         />
         <Stat
           label="Total de Clientes"
           value={totalClientes}
-          trend={8} // Mock trend
           icon={<Users className="w-5 h-5" />}
         />
         <Stat
           label="Taxa de Comparecimento"
           value={`${taxaComparecimento}%`}
-          trend={2} // Mock trend
           icon={<Activity className="w-5 h-5" />}
         />
       </div>
