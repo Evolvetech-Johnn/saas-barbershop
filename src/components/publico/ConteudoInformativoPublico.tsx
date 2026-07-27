@@ -11,9 +11,9 @@ const categoryLabels: Record<CategoriaConteudoPublico, string> = {
 };
 
 const categoryColors: Record<CategoriaConteudoPublico, string> = {
-  dica: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-  curiosidade: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-  novidade: 'bg-[var(--tenant-accent)]/10 text-[var(--tenant-accent)] border-[var(--tenant-accent)]/20',
+  dica: 'bg-foreground/10 text-foreground border-foreground/20',
+  curiosidade: 'bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20',
+  novidade: 'bg-accent/10 text-accent border-accent/20',
 };
 
 export const ConteudoInformativoPublico: React.FC = () => {
@@ -25,19 +25,19 @@ export const ConteudoInformativoPublico: React.FC = () => {
   if (conteudos.length === 0) return null;
 
   return (
-    <section id="conteudo" aria-labelledby="conteudo-titulo" className="py-20 bg-base-900">
+    <section id="conteudo" aria-labelledby="conteudo-titulo" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 id="conteudo-titulo" className="text-3xl md:text-4xl font-serif font-bold mb-4">
+          <h2 id="conteudo-titulo" className="text-3xl md:text-4xl font-heading font-bold mb-4 text-foreground">
             Dicas & Curiosidades
           </h2>
-          <p className="text-support-300 max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto">
             Fique por dentro das novidades e aprenda a cuidar melhor do seu estilo.
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {conteudos.map((conteudo) => (
-            <Card key={(conteudo as any)._id || conteudo.id} className="p-5 hover:border-[var(--tenant-accent)]/30 transition-colors flex flex-col h-full">
+            <Card key={(conteudo as any)._id || conteudo.id} className="p-5 bg-card hover:border-accent/30 transition-colors flex flex-col h-full border-border">
               {conteudo.imagemUrl && (
                 <img
                   src={conteudo.imagemUrl}
@@ -56,15 +56,15 @@ export const ConteudoInformativoPublico: React.FC = () => {
                 </span>
                 <time
                   dateTime={conteudo.dataPublicacao.toISOString()}
-                  className="text-xs text-support-400"
+                  className="text-xs text-muted-foreground"
                 >
                   {conteudo.dataPublicacao.toLocaleDateString('pt-BR')}
                 </time>
               </div>
-              <h3 className="text-lg font-serif font-semibold mb-2 line-clamp-2">
+              <h3 className="text-lg font-heading font-semibold mb-2 line-clamp-2 text-foreground">
                 {conteudo.titulo}
               </h3>
-              <p className="text-support-300 text-sm flex-grow line-clamp-3">
+              <p className="text-muted-foreground text-sm flex-grow line-clamp-3">
                 {conteudo.resumo}
               </p>
             </Card>

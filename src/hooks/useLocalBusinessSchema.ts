@@ -23,19 +23,25 @@ export const useLocalBusinessSchema = (tenant: SchemaProps | null | undefined) =
       document.head.appendChild(script);
     }
 
-    const schemaData = {
+    const currentUrl = window.location.href.split('?')[0];
+
+    const schemaData: any = {
       "@context": "https://schema.org",
       "@type": "HairSalon",
       "name": tenant.nome,
-      "image": tenant.logoUrl,
-      "description": tenant.descricaoPublica,
-      "address": {
+      "url": currentUrl,
+    };
+
+    if (tenant.logoUrl) schemaData["image"] = tenant.logoUrl;
+    if (tenant.descricaoPublica) schemaData["description"] = tenant.descricaoPublica;
+    if (tenant.endereco) {
+      schemaData["address"] = {
         "@type": "PostalAddress",
         "streetAddress": tenant.endereco
-      },
-      "telephone": tenant.telefone,
-      "openingHours": tenant.horarioFuncionamento
-    };
+      };
+    }
+    if (tenant.telefone) schemaData["telephone"] = tenant.telefone;
+    if (tenant.horarioFuncionamento) schemaData["openingHours"] = tenant.horarioFuncionamento;
 
     script.textContent = JSON.stringify(schemaData);
 

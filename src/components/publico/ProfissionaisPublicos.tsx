@@ -25,20 +25,21 @@ const professionals = [
 
 export const ProfissionaisPublicos: React.FC = () => {
   return (
-    <section id="equipe" className="py-20">
+    <section id="equipe" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4">Nossa Equipe</h2>
-          <p className="text-support-300 max-w-2xl mx-auto">
-            Conheça nossos profissionais qualificados.</p>
+          <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4 text-foreground">Nossa Equipe</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Conheça nossos profissionais qualificados.
+          </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
           {professionals.map((pro, index) => (
-            <Card key={index} className="p-6 text-center">
-              <Avatar src={pro.image} name={pro.name} size="xl" className="mx-auto mb-4" />
-              <h3 className="text-xl font-serif font-semibold mb-1">{pro.name}</h3>
-              <p className="text-[var(--tenant-accent)] mb-2">{pro.role}</p>
-              <p className="text-support-300 text-sm">{pro.specialty}</p>
+            <Card key={index} className="p-6 text-center bg-card border-border">
+              <Avatar src={pro.image} name={pro.name} size="xl" className="mx-auto mb-4 border-2 border-accent/20" />
+              <h3 className="text-xl font-heading font-semibold mb-1 text-foreground">{pro.name}</h3>
+              <p className="text-accent mb-2 font-medium">{pro.role}</p>
+              <p className="text-muted-foreground text-sm">{pro.specialty}</p>
             </Card>
           ))}
         </div>

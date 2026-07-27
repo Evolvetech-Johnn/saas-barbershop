@@ -8,24 +8,28 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: 'var(--background)',
+        background: '#0F0F23',
+        card: '#1B1B30',
+        primary: '#1E1B4B',
+        accent: {
+          DEFAULT: '#CA8A04',
+          hover: '#A16207', // Adding hover to match standard tailwind variants
+        },
+        foreground: '#F8FAFC',
+        'muted-foreground': '#94A3B8',
+        border: '#4338CA',
+        destructive: '#EF4444',
+        
+        // Preserving non-related tokens
         surface: {
           1: 'var(--surface-1)',
           2: 'var(--surface-2)',
           raised: 'var(--surface-raised)',
         },
-        border: {
-          subtle: 'var(--border-subtle)',
-          strong: 'var(--border-strong)',
-        },
         text: {
           primary: 'var(--text-primary)',
           secondary: 'var(--text-secondary)',
           muted: 'var(--text-muted)',
-        },
-        accent: {
-          DEFAULT: 'var(--accent)',
-          hover: 'var(--accent-hover)',
         },
         status: {
           success: 'var(--success)',
@@ -35,7 +39,7 @@ export default {
         ring: 'var(--focus-ring)',
       },
       fontFamily: {
-        serif: ['Playfair Display', 'serif'],
+        heading: ['Playfair Display', 'serif'],
         sans: ['Inter', 'sans-serif'],
       },
       borderRadius: {
