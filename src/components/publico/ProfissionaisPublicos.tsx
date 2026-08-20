@@ -1,30 +1,15 @@
 import React from 'react';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
+import { useProfissionais } from '@/hooks/useProfissionais';
 import { FadeIn } from './FadeIn';
 
-const professionals = [
-  {
-    name: 'João Silva',
-    role: 'Barbeiro Chefe',
-    specialty: 'Cortes clássicos',
-    image: 'https://coresg-normal.trae.ai/api/v1/text_to_image?prompt=professional%20barber%20portrait%20man%20smiling%20realistic&image_size=square',
-  },
-  {
-    name: 'Maria Santos',
-    role: 'Barbeira',
-    specialty: 'Barbas modernas',
-    image: 'https://coresg-normal.trae.ai/api/v1/text_to_image?prompt=professional%20female%20barber%20portrait%20woman%20smiling%20realistic&image_size=square',
-  },
-  {
-    name: 'Carlos Pereira',
-    role: 'Barbeiro',
-    specialty: 'Cortes modernos',
-    image: 'https://coresg-normal.trae.ai/api/v1/text_to_image?prompt=professional%20barber%20portrait%20man%20smiling%20realistic&image_size=square',
-  },
-];
-
 export const ProfissionaisPublicos: React.FC = () => {
+  const { profissionais, loading } = useProfissionais();
+  const profissionaisAtivos = profissionais.filter((p) => p.ativo !== false);
+
+  if (!loading && profissionaisAtivos.length === 0) return null;
+
   return (
     <section id="equipe" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,16 +20,20 @@ export const ProfissionaisPublicos: React.FC = () => {
           </p>
         </FadeIn>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {professionals.map((pro, index) => (
-            <FadeIn key={index} delay={index * 0.1}>
-              <Card className="p-6 text-center bg-card border-border h-full">
-                <Avatar src={pro.image} name={pro.name} size="xl" className="mx-auto mb-4 border-2 border-accent/20" />
-                <h3 className="text-xl font-heading font-semibold mb-1 text-foreground">{pro.name}</h3>
-                <p className="text-accent mb-2 font-medium">{pro.role}</p>
-                <p className="text-muted-foreground text-sm">{pro.specialty}</p>
-              </Card>
-            </FadeIn>
-          ))}
+          {profissionaisAtivos.map((pro) => {
+            const id = (pro as any)._id || pro.id;
+            return (
+              <FadeIn key={id}>
+                <Card className="p-6 text-center bg-card border-border h-full">
+                  <Avatar name={pro.nome} size="xl" className="mx-auto mb-4 border-2 border-accent/20" style={{ backgroundColor: pro.cor }} />
+                  <h3 className="text-xl font-heading font-semibold mb-1 text-foreground">{pro.nome}</h3>
+                  {pro.especialidade && pro.especialidade.length > 0 && (
+                    <p className="text-muted-foreground text-sm">{pro.especialidade.join(', ')}</p>
+                  )}
+                </Card>
+              </FadeIn>
+            );
+          })}
         </div>
       </div>
     </section>

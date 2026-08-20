@@ -8,7 +8,11 @@ export const financeiroService = {
     });
 
     const total = comandasFiltradas.reduce((sum, c) => sum + c.total, 0);
-    const recebido = total; // Assumes all closed comandas are paid
+    // ponytail: toda comanda já registra a forma de pagamento no momento da
+    // venda (não existe venda fiado no sistema), então "recebido = total" é
+    // correto hoje. Se um dia existir venda a prazo, isso precisa vir de um
+    // status de pagamento real por comanda, não dessa suposição.
+    const recebido = total;
     const areceber = 0;
 
     const formasPagamento: Record<FormaPagamento, number> = {

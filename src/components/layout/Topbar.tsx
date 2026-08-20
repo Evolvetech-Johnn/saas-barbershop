@@ -1,8 +1,7 @@
 import React from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { useAuth } from '@/context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/context/ToastContext';
+import { useTenant } from '@/context/TenantContext';
 import { Menu, Bell, LogOut } from 'lucide-react';
 
 interface TopbarProps {
@@ -11,13 +10,18 @@ interface TopbarProps {
 
 export const Topbar: React.FC<TopbarProps> = ({ onToggleSidebar }) => {
   const { usuario, logout } = useAuth();
-  const navigate = useNavigate();
-  const { addToast } = useToast();
+  const { tenant } = useTenant();
 
-  const handleLogout = () => {
-    logout();
-    addToast('Você foi desconectado!', 'info');
-    navigate('/app/login');
+  const handleLogout = async () => {
+    // navigate() e até window.location.hash perdem a corrida aqui: o
+    // ProtectedRoute da rota protegida atual (ex: /app/dashboard) ainda está
+    // montado quando a sessão é limpa, e seu próprio redirect pra /app/login
+    // sobrepõe o nosso. Um reload completo elimina a árvore de componentes
+    // React inteira, sem disputa possível.
+    const destino = tenant?.slug ? `/${tenant.slug}` : '/';
+    await logout();
+    window.location.hash = `#${destino}`;
+    window.location.reload();
   };
 
   return (

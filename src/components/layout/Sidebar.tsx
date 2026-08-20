@@ -17,7 +17,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
-  Megaphone
+  Megaphone,
+  CreditCard,
 } from 'lucide-react';
 
 const menuGroups = [
@@ -50,6 +51,7 @@ const menuGroups = [
   {
     label: 'Sistema',
     items: [
+      { path: '/app/assinatura', label: 'Assinatura', icon: CreditCard },
       { path: '/app/configuracoes', label: 'Configurações', icon: Settings },
     ]
   }

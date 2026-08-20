@@ -1,5 +1,5 @@
 import React from 'react';
-import { SaaSPlan } from '@/data/mockSaaS';
+import { SaaSPlan } from '@/services/superadminService';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
@@ -7,6 +7,8 @@ interface PlanoSaaSCardProps {
   plan: SaaSPlan;
   onEdit: (plan: SaaSPlan) => void;
 }
+
+const formatLimite = (v: number | null) => (v === null ? 'Ilimitado' : v);
 
 export const PlanoSaaSCard: React.FC<PlanoSaaSCardProps> = ({ plan, onEdit }) => {
   return (
@@ -31,15 +33,15 @@ export const PlanoSaaSCard: React.FC<PlanoSaaSCardProps> = ({ plan, onEdit }) =>
           <ul className="space-y-1.5 text-sm text-support-200">
             <li className="flex justify-between gap-3">
               <span>Profissionais:</span>
-              <span className="font-semibold text-base-100">{plan.limiteProfissionais}</span>
+              <span className="font-semibold text-base-100">{formatLimite(plan.limiteProfissionais)}</span>
             </li>
             <li className="flex justify-between gap-3">
               <span>Serviços:</span>
-              <span className="font-semibold text-base-100">{plan.limiteServicos}</span>
+              <span className="font-semibold text-base-100">{formatLimite(plan.limiteServicos)}</span>
             </li>
             <li className="flex justify-between gap-3">
               <span>Clientes:</span>
-              <span className="font-semibold text-base-100">{plan.limiteClientes}</span>
+              <span className="font-semibold text-base-100">{formatLimite(plan.limiteClientes)}</span>
             </li>
           </ul>
         </div>

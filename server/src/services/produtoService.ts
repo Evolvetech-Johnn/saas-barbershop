@@ -1,23 +1,36 @@
-import { Produto, IProduto } from '../models';
+import { Repo } from '../lib/db';
+
+export interface Produto {
+  id: string;
+  tenantId: string;
+  nome: string;
+  categoria: string;
+  preco: number;
+  custo: number;
+  quantidade: number;
+  quantidadeMinima: number;
+  ativo: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+}
+
+const repo = new Repo<Produto>('produtos');
 
 export class ProdutoService {
-  static async getAll(tenantId: string): Promise<IProduto[]> {
-    return Produto.find({ tenantId, deletedAt: null }).sort({ nome: 1 });
+  static getAll(tenantId: string) {
+    return repo.findAll(tenantId, 'nome');
   }
-
-  static async getById(tenantId: string, id: string): Promise<IProduto | null> {
-    return Produto.findOne({ _id: id, tenantId, deletedAt: null });
+  static getById(tenantId: string, id: string) {
+    return repo.findById(tenantId, id);
   }
-
-  static async create(data: Partial<IProduto>): Promise<IProduto> {
-    return Produto.create(data);
+  static create(data: Partial<Produto>) {
+    return repo.create(data);
   }
-
-  static async update(tenantId: string, id: string, data: Partial<IProduto>): Promise<IProduto | null> {
-    return Produto.findOneAndUpdate({ _id: id, tenantId }, data, { new: true });
+  static update(tenantId: string, id: string, data: Partial<Produto>) {
+    return repo.update(tenantId, id, data);
   }
-
-  static async softDelete(tenantId: string, id: string): Promise<IProduto | null> {
-    return Produto.findOneAndUpdate({ _id: id, tenantId }, { deletedAt: new Date() }, { new: true });
+  static softDelete(tenantId: string, id: string) {
+    return repo.softDelete(tenantId, id);
   }
 }

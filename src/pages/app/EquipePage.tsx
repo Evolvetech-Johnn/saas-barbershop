@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { useProfissionais } from '@/hooks/useProfissionais';
 import { useComissoes } from '@/hooks/useComissoes';
 import { ProfissionalForm } from '@/components/equipe/ProfissionalForm';
+import { AcessosEquipe } from '@/components/equipe/AcessosEquipe';
 import { Profissional } from '@/types/profissional';
 import { formatCurrency } from '@/utils/formatters';
 
@@ -164,6 +165,8 @@ export const EquipePage: React.FC = () => {
         onSave={handleSave}
         profissional={profissionalEditando}
       />
+
+      <AcessosEquipe />
     </div>
   );
 };

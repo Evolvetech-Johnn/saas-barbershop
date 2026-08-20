@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const menuItems = [
   { path: '/admin/tenants', label: 'Tenants', icon: '🏢' },
@@ -9,6 +11,15 @@ const menuItems = [
 
 export const SuperAdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
+  const { usuario, logout } = useAuth();
+
+  const handleLogout = async () => {
+    // Reload completo evita disputa entre o guard da rota atual e o navigate
+    // do react-router (mesma race já resolvida no logout do app do tenant).
+    await logout();
+    window.location.hash = '#/admin/login';
+    window.location.reload();
+  };
 
   return (
     <div className="flex min-h-screen bg-base-950">
@@ -48,12 +59,19 @@ export const SuperAdminLayout: React.FC<{ children: React.ReactNode }> = ({ chil
             </button>
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium">Super Admin</p>
-                <p className="text-xs text-support-300">admin@saas.com</p>
+                <p className="text-sm font-medium">{usuario?.nome || 'Super Admin'}</p>
+                <p className="text-xs text-support-300">{usuario?.email}</p>
               </div>
               <div className="w-10 h-10 rounded-full bg-[var(--tenant-accent)] text-base-950 flex items-center justify-center font-semibold">
-                SA
+                {(usuario?.nome || 'SA').charAt(0).toUpperCase()}
               </div>
+              <button
+                onClick={handleLogout}
+                className="p-2 text-support-300 hover:text-red-400 hover:bg-base-800 rounded-md transition-colors"
+                title="Sair"
+              >
+                <LogOut size={18} />
+              </button>
             </div>
           </div>
         </header>

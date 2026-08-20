@@ -1,6 +1,7 @@
 import React from 'react';
 import { HeroPublico } from '@/components/publico/HeroPublico';
 import { ServicosPublicos } from '@/components/publico/ServicosPublicos';
+import { GaleriaPublica } from '@/components/publico/GaleriaPublica';
 import { ProfissionaisPublicos } from '@/components/publico/ProfissionaisPublicos';
 import { PromocoesPublicas } from '@/components/publico/PromocoesPublicas';
 import { ConteudoInformativoPublico } from '@/components/publico/ConteudoInformativoPublico';
@@ -26,6 +27,7 @@ export const PaginaPublicaPage: React.FC = () => {
     <div className="bg-background text-foreground min-h-screen font-sans">
       <HeroPublico />
       <ServicosPublicos />
+      <GaleriaPublica />
       <PromocoesPublicas />
       <ConteudoInformativoPublico />
       <ProfissionaisPublicos />
@@ -47,7 +49,7 @@ export const PaginaPublicaPage: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1">Endereço</h4>
-                    <p className="text-muted-foreground">Rua das Flores, 123 - Centro</p>
+                    <p className="text-muted-foreground">{tenant?.endereco || 'Endereço não informado'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -56,7 +58,7 @@ export const PaginaPublicaPage: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1">Telefone</h4>
-                    <p className="text-muted-foreground">(11) 98765-4321</p>
+                    <p className="text-muted-foreground">{tenant?.telefone || 'Telefone não informado'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -65,7 +67,7 @@ export const PaginaPublicaPage: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1">Horário</h4>
-                    <p className="text-muted-foreground">Seg-Sex: 9h-19h | Sáb: 9h-17h</p>
+                    <p className="text-muted-foreground">{tenant?.horarioFuncionamento || 'Horário não informado'}</p>
                   </div>
                 </div>
               </div>

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { Button } from '@/components/ui/Button';
 import { SugestoesPromocionais } from '@/components/marketing/SugestoesPromocionais';
 import { useTenant } from '@/context/TenantContext';
 import { apiRequest } from '@/config/api';
@@ -28,11 +29,11 @@ export const MarketingPage: React.FC = () => {
       <PageHeader 
         title="Marketing Inteligente" 
         description="Aproveite nossos algoritmos para identificar horários ociosos e criar promoções matadoras." 
-        action={{
-          label: isGenerating ? 'Analisando...' : 'Analisar e Gerar Sugestões',
-          onClick: handleGerarSugestoes,
-          disabled: isGenerating
-        }}
+        action={
+          <Button onClick={handleGerarSugestoes} disabled={isGenerating}>
+            {isGenerating ? 'Analisando...' : 'Analisar e Gerar Sugestões'}
+          </Button>
+        }
       />
       
       <div className="bg-surface-1 rounded-xl p-6 border border-border-subtle shadow-sm">

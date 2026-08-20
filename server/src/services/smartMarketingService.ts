@@ -1,4 +1,3 @@
-import { Agendamento } from '../models';
 import { supabase } from '../lib/supabase';
 
 export class SmartMarketingService {
@@ -12,11 +11,15 @@ export class SmartMarketingService {
     trintaDiasAtras.setDate(hoje.getDate() - 30);
 
     // 1. Buscar agendamentos dos últimos 30 dias
-    const agendamentos = await Agendamento.find({
-      tenantId,
-      dataHora: { $gte: trintaDiasAtras, $lte: hoje },
-      status: { $in: ['concluido', 'confirmado'] } // apenas os que realmente aconteceram/vão acontecer
-    });
+    const { data: agendamentosRaw, error: agendamentosError } = await supabase
+      .from('agendamentos')
+      .select('data_hora')
+      .eq('tenant_id', tenantId)
+      .gte('data_hora', trintaDiasAtras.toISOString())
+      .lte('data_hora', hoje.toISOString())
+      .in('status', ['concluido', 'confirmado']);
+    if (agendamentosError) throw new Error(agendamentosError.message);
+    const agendamentos = (agendamentosRaw || []).map((a) => ({ dataHora: a.data_hora }));
 
     // 2. Agrupar por dia da semana (0-6) e turno (Manhã, Tarde, Noite)
     // 0 = Domingo, 1 = Segunda, etc.
@@ -50,7 +53,7 @@ export class SmartMarketingService {
 
     const nomesDias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
 
-    const sugestoesGeradas = [];
+    const sugestoesGeradas: any[] = [];
 
     // Próximo mês para a promoção
     const proximoMesInicio = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);

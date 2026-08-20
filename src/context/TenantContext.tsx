@@ -22,8 +22,7 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       const tenants = await tenantService.getAllTenants();
       setAvailableTenants(tenants);
       if (tenants.length > 0 && !tenant) {
-        const adminTenant = tenants.find((t) => t.slug === 'admin');
-        setTenant(adminTenant || tenants[0]);
+        setTenant(tenants[0]);
       }
     };
     fetchTenants();

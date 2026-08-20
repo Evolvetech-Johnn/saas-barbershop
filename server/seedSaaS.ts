@@ -1,22 +1,18 @@
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
-import { connectDatabase, disconnectDatabase } from './src/config/database';
-import { Tenant, Servico, PlanoFidelidade } from './src/models';
-
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const combos = [
-  { nome: 'Essencial', descricao: 'Corte tradicional + finalização', preco: 45, duracao: 30 },
-  { nome: 'Corte completo', descricao: 'Corte + lavagem + finalização', preco: 55, duracao: 40 },
-  { nome: 'Corte e barba', descricao: 'Corte + alinhamento de barba', preco: 70, duracao: 50 },
-  { nome: 'Clássico', descricao: 'Corte + barboterapia com toalha quente', preco: 85, duracao: 60 },
-  { nome: 'Premium', descricao: 'Corte + barboterapia + sobrancelha', preco: 95, duracao: 70 },
-  { nome: 'Black', descricao: 'Corte + barboterapia + sobrancelha + depilação de nariz e orelhas', preco: 125, duracao: 90 },
-  { nome: 'Dia de cuidado', descricao: 'Corte + barba + limpeza facial express + sobrancelha', preco: 145, duracao: 120 },
-  { nome: 'Pai e filho', descricao: 'Dois cortes, sendo um infantil', preco: 70, duracao: 60 },
-  { nome: 'Noivo essencial', descricao: 'Corte + barba + sobrancelha + penteado', preco: 140, duracao: 90 },
-  { nome: 'Dia do noivo completo', descricao: 'Corte, barba, hidratação, limpeza facial, mãos e massagem', preco: 300, duracao: 180 },
+  { nome: 'Essencial', preco: 45, duracaoMinutos: 30 },
+  { nome: 'Corte completo', preco: 55, duracaoMinutos: 40 },
+  { nome: 'Corte e barba', preco: 70, duracaoMinutos: 50 },
+  { nome: 'Clássico', preco: 85, duracaoMinutos: 60 },
+  { nome: 'Premium', preco: 95, duracaoMinutos: 70 },
+  { nome: 'Black', preco: 125, duracaoMinutos: 90 },
+  { nome: 'Dia de cuidado', preco: 145, duracaoMinutos: 120 },
+  { nome: 'Pai e filho', preco: 70, duracaoMinutos: 60 },
+  { nome: 'Noivo essencial', preco: 140, duracaoMinutos: 90 },
+  { nome: 'Dia do noivo completo', preco: 300, duracaoMinutos: 180 },
 ];
 
 const planos = [
@@ -28,46 +24,31 @@ const planos = [
 ];
 
 async function seed() {
-  await connectDatabase();
-  
-  // Try to find the first tenant
-  const tenant = await Tenant.findOne();
+  const { supabase } = await import('./src/lib/supabase');
+  const { data: tenant, error: tenantErr } = await supabase.from('tenants').select('id,nome').limit(1).maybeSingle();
+  if (tenantErr) throw tenantErr;
   if (!tenant) {
-    console.error('Nenhum Tenant encontrado! Crie um usuário primeiro.');
-    await disconnectDatabase();
+    console.error('Nenhum Tenant encontrado! Rode server/src/scripts/seed.ts primeiro.');
     process.exit(1);
   }
+  console.log(`Usando Tenant: ${tenant.nome} (${tenant.id})`);
 
-  console.log(`Usando Tenant: ${tenant.nome} (${tenant._id})`);
-
-  // Insert Combos (Servicos)
   for (const combo of combos) {
-    const exists = await Servico.findOne({ tenantId: tenant._id, nome: combo.nome });
+    const { data: exists } = await supabase.from('servicos').select('id').eq('tenant_id', tenant.id).eq('nome', combo.nome).maybeSingle();
     if (!exists) {
-      await Servico.create({
-        tenantId: tenant._id,
-        nome: combo.nome,
-        descricao: combo.descricao,
-        preco: combo.preco,
-        duracao: combo.duracao
-      });
+      await supabase.from('servicos').insert({ tenant_id: tenant.id, nome: combo.nome, preco: combo.preco, duracao_minutos: combo.duracaoMinutos, ativo: true });
       console.log(`[+] Combo criado: ${combo.nome}`);
     } else {
       console.log(`[-] Combo já existe: ${combo.nome}`);
     }
   }
 
-  // Insert Planos
   for (const plano of planos) {
-    const exists = await PlanoFidelidade.findOne({ tenantId: tenant._id, nome: plano.nome });
+    const { data: exists } = await supabase.from('planos_fidelidade').select('id').eq('tenant_id', tenant.id).eq('nome', plano.nome).maybeSingle();
     if (!exists) {
-      await PlanoFidelidade.create({
-        tenantId: tenant._id,
-        nome: plano.nome,
-        descricao: plano.descricao,
-        precoMensal: plano.precoMensal,
-        beneficios: plano.beneficios
-      });
+      await supabase
+        .from('planos_fidelidade')
+        .insert({ tenant_id: tenant.id, nome: plano.nome, descricao: plano.descricao, preco_mensal: plano.precoMensal, beneficios: plano.beneficios, ativo: true });
       console.log(`[+] Plano criado: ${plano.nome}`);
     } else {
       console.log(`[-] Plano já existe: ${plano.nome}`);
@@ -75,7 +56,6 @@ async function seed() {
   }
 
   console.log('✅ Seeding concluído!');
-  await disconnectDatabase();
 }
 
 seed().catch(console.error);

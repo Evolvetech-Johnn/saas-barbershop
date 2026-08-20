@@ -1,8 +1,10 @@
 import { PromocaoService } from '../services/promocaoService';
 import { SmartMarketingService } from '../services/smartMarketingService';
 import { supabase } from '../lib/supabase';
+import { requireAuth } from '../middlewares/authMiddleware';
 
 const promocoesRoutes = async (fastify: any, opts: any) => {
+  // GET fica público: promoções ativas aparecem na página pública da barbearia.
   fastify.get('/promocoes', async (request: any, reply: any) => {
     const tenantId = request.headers['x-tenant-id'] as string;
 
@@ -18,32 +20,26 @@ const promocoesRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  // SMART MARKETING ENDPOINTS
-  fastify.post('/promocoes/gerar-sugestoes', async (request: any, reply: any) => {
-    const tenantId = request.headers['x-tenant-id'] as string;
-    if (!tenantId) return reply.status(400).send({ message: 'Header x-tenant-id é obrigatório' });
-
+  // SMART MARKETING ENDPOINTS — ações internas do time da barbearia.
+  fastify.post('/promocoes/gerar-sugestoes', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const sugestoes = await SmartMarketingService.analisarEGerarSugestoes(tenantId);
+      const sugestoes = await SmartMarketingService.analisarEGerarSugestoes(request.tenantId);
       return reply.send({ success: true, geradas: sugestoes.length, sugestoes });
     } catch (error: any) {
       return reply.status(500).send({ message: 'Erro ao gerar sugestões', error: error.message });
     }
   });
 
-  fastify.get('/promocoes/sugestoes', async (request: any, reply: any) => {
-    const tenantId = request.headers['x-tenant-id'] as string;
-    if (!tenantId) return reply.status(400).send({ message: 'Header x-tenant-id é obrigatório' });
-
+  fastify.get('/promocoes/sugestoes', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
       const { data, error } = await supabase
         .from('promocoes')
         .select('*')
-        .eq('tenant_id', tenantId)
+        .eq('tenant_id', request.tenantId)
         .eq('is_sugestao', true);
 
       if (error) throw error;
-      
+
       const sugestoes = data.map((item) => ({
         id: item.id,
         tenantId: item.tenant_id,
@@ -63,12 +59,9 @@ const promocoesRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  fastify.put('/promocoes/aprovar-sugestao/:id', async (request: any, reply: any) => {
-    const tenantId = request.headers['x-tenant-id'] as string;
+  fastify.put('/promocoes/aprovar-sugestao/:id', { preHandler: requireAuth }, async (request: any, reply: any) => {
     const { id } = request.params;
     const updateData = request.body; // { titulo, descricao, data_inicio, data_fim, etc }
-
-    if (!tenantId) return reply.status(400).send({ message: 'Header x-tenant-id é obrigatório' });
 
     try {
       const { data, error } = await supabase
@@ -84,7 +77,7 @@ const promocoesRoutes = async (fastify: any, opts: any) => {
           updated_at: new Date().toISOString()
         })
         .eq('id', id)
-        .eq('tenant_id', tenantId)
+        .eq('tenant_id', request.tenantId)
         .select();
 
       if (error) throw error;

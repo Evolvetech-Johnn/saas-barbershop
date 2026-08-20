@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { TenantProvider, useTenant } from '@/context/TenantContext';
 import { ToastProvider } from '@/context/ToastContext';
@@ -8,31 +8,40 @@ import { PublicLayout } from '@/components/layout/PublicLayout';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SuperAdminLayout } from '@/components/layout/SuperAdminLayout';
 import { WhatsAppProvider } from '@/context/WhatsAppContext';
-import { StyleguidePage } from '@/pages/StyleguidePage';
-import { WhatsAppPage } from '@/pages/app/whatsapp/WhatsAppPage';
-import { RelatoriosPage } from '@/pages/app/relatorios/RelatoriosPage';
-import { PaginaPublicaPage } from '@/pages/public/PaginaPublicaPage';
-import { AgendamentoPublicoPage } from '@/pages/public/AgendamentoPublicoPage';
-import { LoginPage } from '@/pages/app/LoginPage';
-import OnboardingPage from '@/pages/app/OnboardingPage';
-import { DashboardPage } from '@/pages/app/DashboardPage';
-import { AgendaPage } from '@/pages/app/AgendaPage';
-import { ClientesPage } from '@/pages/app/ClientesPage';
-import { ServicosPage } from '@/pages/app/ServicosPage';
-import { FinanceiroPage } from '@/pages/app/FinanceiroPage';
-import { EquipePage } from '@/pages/app/EquipePage';
-import { ComissoesPage } from '@/pages/app/ComissoesPage';
-import { EstoquePage } from '@/pages/app/EstoquePage';
-import { PlanosPage } from '@/pages/app/PlanosPage';
-import { ConfiguracoesPage } from '@/pages/app/ConfiguracoesPage';
-import { MarketingPage } from '@/pages/app/marketing/MarketingPage';
+
+// Cada página vira um chunk separado, carregado só quando a rota é visitada
+// — evita um bundle único de ~1MB com todas as telas do app de uma vez.
+const StyleguidePage = lazy(() => import('@/pages/StyleguidePage').then((m) => ({ default: m.StyleguidePage })));
+const RelatoriosPage = lazy(() => import('@/pages/app/relatorios/RelatoriosPage').then((m) => ({ default: m.RelatoriosPage })));
+const PaginaPublicaPage = lazy(() => import('@/pages/public/PaginaPublicaPage').then((m) => ({ default: m.PaginaPublicaPage })));
+const AgendamentoPublicoPage = lazy(() => import('@/pages/public/AgendamentoPublicoPage').then((m) => ({ default: m.AgendamentoPublicoPage })));
+const LoginPage = lazy(() => import('@/pages/app/LoginPage').then((m) => ({ default: m.LoginPage })));
+const OnboardingPage = lazy(() => import('@/pages/app/OnboardingPage'));
+const DashboardPage = lazy(() => import('@/pages/app/DashboardPage').then((m) => ({ default: m.DashboardPage })));
+const AgendaPage = lazy(() => import('@/pages/app/AgendaPage').then((m) => ({ default: m.AgendaPage })));
+const ClientesPage = lazy(() => import('@/pages/app/ClientesPage').then((m) => ({ default: m.ClientesPage })));
+const ServicosPage = lazy(() => import('@/pages/app/ServicosPage').then((m) => ({ default: m.ServicosPage })));
+const FinanceiroPage = lazy(() => import('@/pages/app/FinanceiroPage').then((m) => ({ default: m.FinanceiroPage })));
+const EquipePage = lazy(() => import('@/pages/app/EquipePage').then((m) => ({ default: m.EquipePage })));
+const ComissoesPage = lazy(() => import('@/pages/app/ComissoesPage').then((m) => ({ default: m.ComissoesPage })));
+const EstoquePage = lazy(() => import('@/pages/app/EstoquePage').then((m) => ({ default: m.EstoquePage })));
+const PlanosPage = lazy(() => import('@/pages/app/PlanosPage').then((m) => ({ default: m.PlanosPage })));
+const ConfiguracoesPage = lazy(() => import('@/pages/app/ConfiguracoesPage').then((m) => ({ default: m.ConfiguracoesPage })));
+const AssinaturaPage = lazy(() => import('@/pages/app/AssinaturaPage').then((m) => ({ default: m.AssinaturaPage })));
+const MarketingPage = lazy(() => import('@/pages/app/marketing/MarketingPage').then((m) => ({ default: m.MarketingPage })));
 
 // Super Admin Pages
-import { SuperAdminLoginPage } from '@/pages/superadmin/SuperAdminLoginPage';
-import { TenantsPage } from '@/pages/superadmin/TenantsPage';
-import { TenantDetalhePage } from '@/pages/superadmin/TenantDetalhePage';
-import { PlanosSaaSPage } from '@/pages/superadmin/PlanosSaaSPage';
-import { FaturamentoSaaSPage } from '@/pages/superadmin/FaturamentoSaaSPage';
+const SuperAdminLoginPage = lazy(() => import('@/pages/superadmin/SuperAdminLoginPage').then((m) => ({ default: m.SuperAdminLoginPage })));
+const TenantsPage = lazy(() => import('@/pages/superadmin/TenantsPage').then((m) => ({ default: m.TenantsPage })));
+const TenantDetalhePage = lazy(() => import('@/pages/superadmin/TenantDetalhePage').then((m) => ({ default: m.TenantDetalhePage })));
+const PlanosSaaSPage = lazy(() => import('@/pages/superadmin/PlanosSaaSPage').then((m) => ({ default: m.PlanosSaaSPage })));
+const FaturamentoSaaSPage = lazy(() => import('@/pages/superadmin/FaturamentoSaaSPage').then((m) => ({ default: m.FaturamentoSaaSPage })));
+
+const PageFallback: React.FC = () => (
+  <div className="min-h-screen flex items-center justify-center bg-base-950">
+    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[var(--tenant-accent)]" />
+  </div>
+);
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { usuario } = useAuth();
@@ -64,6 +73,7 @@ const AppRoutesContent: React.FC = () => {
   const isFirstAccess = usuario && tenant && !tenant.onboardingConcluido;
 
   return (
+    <Suspense fallback={<PageFallback />}>
     <Routes>
       <Route path="/styleguide" element={<StyleguidePage />} />
 
@@ -181,17 +191,18 @@ const AppRoutesContent: React.FC = () => {
           </AppLayout>
         </ProtectedRoute>
       } />
-      <Route path="/app/whatsapp" element={
-        <ProtectedRoute>
-          <AppLayout>
-            <WhatsAppPage />
-          </AppLayout>
-        </ProtectedRoute>
-      } />
+      {/* WhatsApp: escondido até ter integração real (hoje é mock em localStorage) */}
       <Route path="/app/configuracoes" element={
         <ProtectedRoute>
           <AppLayout>
             <ConfiguracoesPage />
+          </AppLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/app/assinatura" element={
+        <ProtectedRoute>
+          <AppLayout>
+            <AssinaturaPage />
           </AppLayout>
         </ProtectedRoute>
       } />
@@ -228,6 +239,7 @@ const AppRoutesContent: React.FC = () => {
       {/* Fallback para rotas não encontradas */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 };
 

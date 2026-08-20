@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockTenantsDetails } from '@/data/mockSaaS';
+import { superadminService, TenantSaaSDetails } from '@/services/superadminService';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -8,7 +8,19 @@ import { Badge } from '@/components/ui/Badge';
 export const TenantDetalhePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const tenant = mockTenantsDetails.find(t => t.id === id);
+  const [tenant, setTenant] = useState<TenantSaaSDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    superadminService
+      .getTenants()
+      .then((tenants) => setTenant(tenants.find((t) => t.id === id) || null))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) {
+    return <p className="text-center text-support-400 py-12">Carregando...</p>;
+  }
 
   if (!tenant) {
     return (

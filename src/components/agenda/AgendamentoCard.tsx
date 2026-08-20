@@ -52,7 +52,7 @@ export const AgendamentoCard: React.FC<AgendamentoCardProps> = ({
           <Avatar name={cliente} size="md" />
           <div className="truncate">
             <p className="font-medium text-text-primary truncate">{cliente}</p>
-            <p className="text-xs text-text-muted truncate">{servico}</p>
+            <p className="text-xs text-text-muted truncate">{servico} • {profissional}</p>
           </div>
         </div>
         <div className="mt-2 sm:mt-0 flex flex-col items-start sm:items-end shrink-0 gap-1.5">

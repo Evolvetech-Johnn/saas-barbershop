@@ -8,7 +8,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from 'recharts';
-import { SaaSRevenueTrend } from '@/data/mockSaaS';
+import { SaaSRevenueTrend } from '@/services/superadminService';
 
 interface ReceitaSaaSChartProps {
   data: SaaSRevenueTrend[];

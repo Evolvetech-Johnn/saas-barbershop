@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { Usuario } from '../models';
+import { UsuarioService } from '../services/usuarioService';
 
 const authRoutes = async (fastify: any, opts: any) => {
   // Login
-  fastify.post('/auth/login', async (request: any, reply: any) => {
+  fastify.post('/auth/login', { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } }, async (request: any, reply: any) => {
     const bodySchema = z.object({
       email: z.string().email(),
       password: z.string().min(6),
@@ -15,12 +15,12 @@ const authRoutes = async (fastify: any, opts: any) => {
       return reply.status(400).send({ error: 'Tenant ID is required' });
     }
 
-    const usuario = await Usuario.findOne({ email, tenantId, deletedAt: null });
+    const usuario = await UsuarioService.getByEmail(tenantId, email);
     if (!usuario) {
       return reply.status(401).send({ error: 'Invalid credentials' });
     }
 
-    const isValid = await usuario.compareSenha(password);
+    const isValid = await UsuarioService.compareSenha(password, usuario.senhaHash);
     if (!isValid) {
       return reply.status(401).send({ error: 'Invalid credentials' });
     }
@@ -30,16 +30,53 @@ const authRoutes = async (fastify: any, opts: any) => {
     }
 
     const user = {
-      id: usuario._id,
+      id: usuario.id,
       email: usuario.email,
       nome: usuario.nome,
       tenantId: usuario.tenantId,
-      role: usuario.papel,
-      fotoUrl: usuario.fotoUrl
+      papel: usuario.papel,
+      fotoUrl: usuario.fotoUrl,
     };
 
-    const token = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.role }, { expiresIn: '1h' });
-    const refreshToken = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.role }, { expiresIn: '7d' });
+    const token = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.papel }, { expiresIn: '1h' });
+    const refreshToken = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.papel }, { expiresIn: '7d' });
+    return reply.send({ token, refreshToken, user });
+  });
+
+  // Login do superadmin da plataforma — não é escopado por tenant, por isso
+  // não exige x-tenant-id como o /auth/login normal.
+  fastify.post('/auth/admin-login', { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } }, async (request: any, reply: any) => {
+    const bodySchema = z.object({
+      email: z.string().email(),
+      password: z.string().min(6),
+    });
+    const { email, password } = bodySchema.parse(request.body);
+
+    const usuario = await UsuarioService.getAdminByEmail(email);
+    if (!usuario) {
+      return reply.status(401).send({ error: 'Invalid credentials' });
+    }
+
+    const isValid = await UsuarioService.compareSenha(password, usuario.senhaHash);
+    if (!isValid) {
+      return reply.status(401).send({ error: 'Invalid credentials' });
+    }
+
+    if (!usuario.ativo) {
+      return reply.status(403).send({ error: 'User is inactive' });
+    }
+
+    const user = {
+      id: usuario.id,
+      email: usuario.email,
+      nome: usuario.nome,
+      tenantId: usuario.tenantId,
+      papel: usuario.papel,
+      fotoUrl: usuario.fotoUrl,
+    };
+
+    const token = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.papel }, { expiresIn: '1h' });
+    const refreshToken = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.papel }, { expiresIn: '7d' });
     return reply.send({ token, refreshToken, user });
   });
 
@@ -49,7 +86,7 @@ const authRoutes = async (fastify: any, opts: any) => {
     const { refreshToken } = bodySchema.parse(request.body);
     try {
       const decoded: any = fastify.jwt.verify(refreshToken);
-      const usuario = await Usuario.findById(decoded.sub);
+      const usuario = await UsuarioService.getByIdAnyTenant(decoded.sub);
       if (!usuario) {
         return reply.status(401).send({ error: 'Invalid user' });
       }

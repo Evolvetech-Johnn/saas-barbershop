@@ -12,6 +12,16 @@ export const agendamentoService = {
     }, tenantId);
   },
 
+  getHorariosDisponiveis: async (
+    tenantId: string,
+    profissionalId: string,
+    dataISO: string,
+    duracaoMinutos: number
+  ): Promise<string[]> => {
+    const params = new URLSearchParams({ profissionalId, data: dataISO, duracaoMinutos: String(duracaoMinutos) });
+    return apiRequest<string[]>(`/agendamentos/disponibilidade?${params}`, { method: 'GET' }, tenantId);
+  },
+
   getById: async (tenantId: string, id: string): Promise<Agendamento> => {
     return apiRequest<Agendamento>(`/agendamentos/${id}`, {
       method: 'GET',

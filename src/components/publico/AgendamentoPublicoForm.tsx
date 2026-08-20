@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { CalendarioAgenda } from '@/components/agenda/CalendarioAgenda';
@@ -10,15 +10,10 @@ import { useProfissionais } from '@/hooks/useProfissionais';
 import { Scissors, User as UserIcon, Calendar as CalendarIcon, CheckCircle2, ChevronRight, ChevronLeft, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const mockHorarios = [
-  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-  '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00',
-];
-
 export const AgendamentoPublicoForm: React.FC = () => {
   const { tenant } = useTenant();
   const { addToast } = useToast();
-  
+
   const { servicos } = useServicos();
   const { profissionais } = useProfissionais();
 
@@ -36,7 +31,23 @@ export const AgendamentoPublicoForm: React.FC = () => {
   const servicoSelecionado = servicos.find((servico) => ((servico as any)._id || servico.id) === formData.servico);
   const duracaoMinutos = servicoSelecionado?.duracaoMinutos ?? 30;
 
-  const horariosDisponiveis = mockHorarios;
+  const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
+  const [carregandoHorarios, setCarregandoHorarios] = useState(false);
+
+  useEffect(() => {
+    if (!tenant || !formData.profissional) {
+      setHorariosDisponiveis([]);
+      return;
+    }
+    const currentTenantId = (tenant as any)._id || tenant.id;
+    const dataISO = selectedDate.toISOString().slice(0, 10);
+    setCarregandoHorarios(true);
+    agendamentoService
+      .getHorariosDisponiveis(currentTenantId, formData.profissional, dataISO, duracaoMinutos)
+      .then(setHorariosDisponiveis)
+      .catch(() => setHorariosDisponiveis([]))
+      .finally(() => setCarregandoHorarios(false));
+  }, [tenant, formData.profissional, selectedDate, duracaoMinutos]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,7 +250,13 @@ export const AgendamentoPublicoForm: React.FC = () => {
               
               <div className="space-y-4">
                 <h4 className="font-medium text-text-primary">Horários Disponíveis</h4>
-                {formData.profissional ? (
+                {carregandoHorarios ? (
+                  <p className="text-sm text-text-muted italic">Verificando horários livres...</p>
+                ) : !formData.profissional ? (
+                  <p className="text-sm text-text-muted italic">Volte e escolha um profissional para ver os horários.</p>
+                ) : horariosDisponiveis.length === 0 ? (
+                  <p className="text-sm text-text-muted italic">Nenhum horário livre nesse dia pra esse profissional. Tente outra data.</p>
+                ) : (
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                     {horariosDisponiveis.map((horario) => (
                       <button
@@ -255,8 +272,6 @@ export const AgendamentoPublicoForm: React.FC = () => {
                       </button>
                     ))}
                   </div>
-                ) : (
-                  <p className="text-sm text-text-muted italic">Volte e escolha um profissional para ver os horários.</p>
                 )}
               </div>
 

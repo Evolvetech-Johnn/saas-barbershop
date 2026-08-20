@@ -6,9 +6,13 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/Card'
 import { generateSlug } from '@/utils/slug'
+import { profissionalService } from '@/services/profissionalService'
+import { servicoService } from '@/services/servicoService'
+import { useAuth } from '@/context/AuthContext'
 
 const OnboardingPage: React.FC = () => {
   const { availableTenants, setTenant, updateTenant, tenant } = useTenant()
+  const { usuario } = useAuth()
   const { addToast } = useToast()
   const navigate = useNavigate()
 
@@ -46,7 +50,7 @@ const OnboardingPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     await updateTenant({
       nome: formData.nome,
       slug: formData.slug,
@@ -57,7 +61,29 @@ const OnboardingPage: React.FC = () => {
       horarioFuncionamento: formData.horarioFuncionamento,
       onboardingConcluido: true,
     })
-    
+
+    // Cria um profissional (o próprio dono) e serviços básicos pra o painel
+    // não abrir vazio. Não bloqueia o onboarding se isso falhar.
+    const tenantId = tenant ? ((tenant as any)._id || tenant.id) : undefined
+    if (tenantId) {
+      try {
+        await profissionalService.create(tenantId, {
+          nome: usuario?.nome || formData.nome,
+          especialidade: ['Corte'],
+          ativo: true,
+        } as any)
+        await Promise.all(
+          [
+            { nome: 'Corte de Cabelo', preco: 50, duracaoMinutos: 30 },
+            { nome: 'Barba', preco: 35, duracaoMinutos: 25 },
+            { nome: 'Corte + Barba', preco: 75, duracaoMinutos: 55 },
+          ].map((s) => servicoService.create(tenantId, { ...s, ativo: true } as any))
+        )
+      } catch (err) {
+        console.error('Erro ao criar dados iniciais do onboarding:', err)
+      }
+    }
+
     addToast('Onboarding concluído com sucesso!', 'success')
     navigate('/app/dashboard')
   }

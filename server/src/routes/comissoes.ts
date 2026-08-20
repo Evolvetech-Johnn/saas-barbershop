@@ -1,29 +1,20 @@
 import { ComissaoService } from '../services/comissaoService';
+import { requireAuth } from '../middlewares/authMiddleware';
 
 const comissoesRoutes = async (fastify: any, opts: any) => {
-  // Get all
-  fastify.get('/comissoes', async (request: any, reply: any) => {
+  fastify.get('/comissoes', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
       const { profissionalId } = request.query;
-      const comissoes = await ComissaoService.getAll(tenantId, profissionalId);
+      const comissoes = await ComissaoService.getAll(request.tenantId, profissionalId);
       return reply.send(comissoes);
     } catch (error: any) {
       return reply.status(500).send({ error: error.message });
     }
   });
 
-  // Mark as paid
-  fastify.patch('/comissoes/:id/pagar', async (request: any, reply: any) => {
+  fastify.patch('/comissoes/:id/pagar', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const atualizada = await ComissaoService.markAsPaid(tenantId, request.params.id);
+      const atualizada = await ComissaoService.markAsPaid(request.tenantId, request.params.id);
       if (!atualizada) {
         return reply.status(404).send({ error: 'Comissao not found' });
       }

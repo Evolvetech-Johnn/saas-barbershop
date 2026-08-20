@@ -1,14 +1,12 @@
-import { PlanoFidelidade, AssinaturaPlano, Cliente } from '../models';
+import { PlanoFidelidadeService } from '../services/planoFidelidadeService';
+import { AssinaturaFidelidadeService } from '../services/assinaturaFidelidadeService';
+import { requireAuth } from '../middlewares/authMiddleware';
 
 const planosRoutes = async (fastify: any, opts: any) => {
   // Get all Planos Fidelidade
-  fastify.get('/planos', async (request: any, reply: any) => {
+  fastify.get('/planos', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const planos = await PlanoFidelidade.find({ tenantId, deletedAt: null }).sort({ precoMensal: 1 });
+      const planos = await PlanoFidelidadeService.getAll(request.tenantId);
       return reply.send(planos);
     } catch (error: any) {
       return reply.status(500).send({ error: error.message });
@@ -16,16 +14,9 @@ const planosRoutes = async (fastify: any, opts: any) => {
   });
 
   // Get Assinaturas
-  fastify.get('/assinaturas', async (request: any, reply: any) => {
+  fastify.get('/assinaturas', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const assinaturas = await AssinaturaPlano.find({ tenantId, status: 'ativo' })
-        .populate('clienteId', 'nome email telefone')
-        .populate('planoFidelidadeId', 'nome precoMensal beneficios')
-        .sort({ dataInicio: -1 });
+      const assinaturas = await AssinaturaFidelidadeService.getAtivas(request.tenantId);
       return reply.send(assinaturas);
     } catch (error: any) {
       return reply.status(500).send({ error: error.message });
@@ -33,53 +24,26 @@ const planosRoutes = async (fastify: any, opts: any) => {
   });
 
   // Assinar Cliente
-  fastify.post('/assinaturas', async (request: any, reply: any) => {
+  fastify.post('/assinaturas', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      
       const { clienteId, planoFidelidadeId } = request.body;
-      
-      // Ensure only one active subscription per user
-      const existing = await AssinaturaPlano.findOne({ tenantId, clienteId, status: 'ativo' });
-      if (existing) {
-        return reply.status(400).send({ error: 'Cliente já possui uma assinatura ativa.' });
-      }
-
-      const assinatura = await AssinaturaPlano.create({
-        tenantId,
-        clienteId,
-        planoFidelidadeId,
-        status: 'ativo'
-      });
-
+      const assinatura = await AssinaturaFidelidadeService.assinar(request.tenantId, clienteId, planoFidelidadeId);
       return reply.status(201).send(assinatura);
     } catch (error: any) {
+      if (error.message.includes('já possui')) {
+        return reply.status(400).send({ error: error.message });
+      }
       return reply.status(500).send({ error: error.message });
     }
   });
 
   // Cancelar assinatura
-  fastify.patch('/assinaturas/:id/cancelar', async (request: any, reply: any) => {
+  fastify.patch('/assinaturas/:id/cancelar', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      
-      const id = request.params.id;
-      const assinatura = await AssinaturaPlano.findOneAndUpdate(
-        { _id: id, tenantId },
-        { status: 'cancelado', dataFim: new Date() },
-        { new: true }
-      );
-      
+      const assinatura = await AssinaturaFidelidadeService.cancelar(request.tenantId, request.params.id);
       if (!assinatura) {
         return reply.status(404).send({ error: 'Assinatura não encontrada' });
       }
-
       return reply.send(assinatura);
     } catch (error: any) {
       return reply.status(500).send({ error: error.message });

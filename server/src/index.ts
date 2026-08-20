@@ -1,6 +1,8 @@
 import fastifyJwt from '@fastify/jwt';
 import fastifyCors from '@fastify/cors';
 import fastifyHelmet from '@fastify/helmet';
+import fastifyRateLimit from '@fastify/rate-limit';
+import fastifyMultipart from '@fastify/multipart';
 import fastifyAutoload from '@fastify/autoload';
 import path from 'path';
 import dotenv from 'dotenv';
@@ -20,23 +22,28 @@ async function bootstrap() {
 
     // Register plugins
     await server.register(fastifyCors, {
-      origin: '*', // adjust in production
+      origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     });
     await server.register(fastifyHelmet);
     await server.register(fastifyJwt, {
       secret: process.env.JWT_PRIVATE_KEY || 'supersecret',
     });
+    await server.register(fastifyRateLimit, {
+      max: 100,
+      timeWindow: '1 minute',
+    });
+    await server.register(fastifyMultipart, {
+      limits: { fileSize: 5 * 1024 * 1024, files: 1 }, // 5MB, um arquivo por request
+    });
 
-    // Tenant extraction middleware
-    server.addHook('preHandler', async (request, reply) => {
-      // Example: tenantId from subdomain header "x-tenant-id"
-      const tenantId = request.headers['x-tenant-id'] as string | undefined;
-      if (tenantId) {
-        // @ts-ignore attach to request
-        request.tenantId = tenantId;
-      } else {
-        // For now allow without tenant; in production enforce
-        request.tenantId = undefined;
+    // Guarda o corpo bruto para a verificação de assinatura do webhook da Stripe
+    // (stripe.webhooks.constructEvent precisa dos bytes originais, não do JSON já parseado).
+    server.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req: any, body: Buffer, done: any) => {
+      req.rawBody = body;
+      try {
+        done(null, body.length ? JSON.parse(body.toString('utf8')) : {});
+      } catch (err) {
+        done(err as Error, undefined);
       }
     });
 

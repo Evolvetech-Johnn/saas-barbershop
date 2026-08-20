@@ -149,7 +149,7 @@ export const AprovarSugestaoModal: React.FC<AprovarSugestaoModalProps> = ({
           <Button variant="outline" onClick={onClose} disabled={loading}>
             Cancelar
           </Button>
-          <Button type="submit" form="aprovar-form" loading={loading} className="min-w-[140px]">
+          <Button type="submit" form="aprovar-form" isLoading={loading} className="min-w-[140px]">
             Aprovar e Publicar
           </Button>
         </div>

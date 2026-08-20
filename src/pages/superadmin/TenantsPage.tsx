@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { mockTenantsDetails, TenantSaaSDetails } from '@/data/mockSaaS';
+import React, { useEffect, useState } from 'react';
+import { superadminService, TenantSaaSDetails } from '@/services/superadminService';
 import { TenantsTable } from '@/components/superadmin/TenantsTable';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -9,7 +9,8 @@ import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/context/ToastContext';
 
 export const TenantsPage: React.FC = () => {
-  const [tenants, setTenants] = useState<TenantSaaSDetails[]>(mockTenantsDetails);
+  const [tenants, setTenants] = useState<TenantSaaSDetails[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('todos');
   const [planFilter, setPlanFilter] = useState('todos');
@@ -23,70 +24,87 @@ export const TenantsPage: React.FC = () => {
   const [newEmail, setNewEmail] = useState('');
   const [newTelefone, setNewTelefone] = useState('');
 
-  const activeTenants = tenants.filter(t => t.status === 'ativo').length;
-  const expiredTenants = tenants.filter(t => t.status === 'vencido').length;
-  
-  // Calculate MRR from active subscription plans
+  const loadTenants = () => {
+    setLoading(true);
+    superadminService
+      .getTenants()
+      .then(setTenants)
+      .catch(() => addToast('Erro ao carregar barbearias.', 'error'))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadTenants();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const activeTenants = tenants.filter((t) => t.status === 'ativo').length;
+  const expiredTenants = tenants.filter((t) => t.status === 'vencido').length;
+
   const totalMRR = tenants.reduce((acc, tenant) => {
     if (tenant.status !== 'ativo') return acc;
     switch (tenant.planoSaas) {
-      case 'premium': return acc + 199.90;
-      case 'pro': return acc + 99.90;
-      case 'start': return acc + 49.90;
-      default: return acc;
+      case 'premium':
+        return acc + 199.9;
+      case 'pro':
+        return acc + 99.9;
+      case 'start':
+        return acc + 49.9;
+      default:
+        return acc;
     }
   }, 0);
 
-  const handleToggleStatus = (id: string) => {
-    setTenants(prev => prev.map(t => {
-      if (t.id === id) {
-        const newStatus = t.status === 'ativo' ? 'inativo' : 'ativo';
-        addToast(`Tenant ${t.nome} ${newStatus === 'ativo' ? 'ativado' : 'suspenso'}!`, 'info');
-        return { ...t, status: newStatus };
-      }
-      return t;
-    }));
+  const handleToggleStatus = async (id: string) => {
+    const tenant = tenants.find((t) => t.id === id);
+    if (!tenant) return;
+    const newStatus = tenant.status === 'ativo' ? 'inativo' : 'ativo';
+    try {
+      await superadminService.setTenantStatus(id, newStatus);
+      setTenants((prev) => prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t)));
+      addToast(`Tenant ${tenant.nome} ${newStatus === 'ativo' ? 'ativado' : 'suspenso'}!`, 'info');
+    } catch {
+      addToast('Erro ao atualizar status do tenant.', 'error');
+    }
   };
 
-  const handleAddTenant = (e: React.FormEvent) => {
+  const handleAddTenant = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newNome || !newSlug || !newEmail) {
       addToast('Nome, Slug e E-mail são obrigatórios!', 'warning');
       return;
     }
 
-    const newTenant: TenantSaaSDetails = {
-      id: String(tenants.length + 1),
-      nome: newNome,
-      slug: newSlug.toLowerCase().replace(/\s+/g, '-'),
-      planoSaas: newPlano,
-      status: 'ativo',
-      dataCriacao: new Date().toISOString().split('T')[0],
-      dataVencimentoPlano: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      faturamentoMensal: 0,
-      agendamentosRealizados: 0,
-      clientesCadastrados: 0,
-      profissionaisCadastrados: 1,
-      contatoEmail: newEmail,
-      contatoTelefone: newTelefone
-    };
-
-    setTenants(prev => [newTenant, ...prev]);
-    setIsModalOpen(false);
-    addToast('Nova Barbearia cadastrada com sucesso!', 'success');
-
-    // Reset Form
-    setNewNome('');
-    setNewSlug('');
-    setNewPlano('start');
-    setNewEmail('');
-    setNewTelefone('');
+    try {
+      const criado = await superadminService.createTenant({
+        nome: newNome,
+        slug: newSlug.toLowerCase().replace(/\s+/g, '-'),
+        planoSaas: newPlano,
+        email: newEmail,
+        telefone: newTelefone,
+      });
+      setIsModalOpen(false);
+      if (criado.senhaTemporaria) {
+        addToast(`Barbearia cadastrada! Login: ${newEmail} / Senha temporária: ${criado.senhaTemporaria}`, 'success');
+      } else {
+        addToast('Nova Barbearia cadastrada com sucesso!', 'success');
+      }
+      setNewNome('');
+      setNewSlug('');
+      setNewPlano('start');
+      setNewEmail('');
+      setNewTelefone('');
+      loadTenants();
+    } catch {
+      addToast('Erro ao cadastrar barbearia.', 'error');
+    }
   };
 
-  const filteredTenants = tenants.filter(t => {
-    const matchesSearch = t.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          t.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          t.contatoEmail.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredTenants = tenants.filter((t) => {
+    const matchesSearch =
+      t.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.contatoEmail || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'todos' || t.status === statusFilter;
     const matchesPlan = planFilter === 'todos' || t.planoSaas === planFilter;
     return matchesSearch && matchesStatus && matchesPlan;
@@ -99,7 +117,7 @@ export const TenantsPage: React.FC = () => {
           <h1 className="text-3xl font-serif font-bold text-base-100 mb-2">🏢 Gerenciamento de Tenants</h1>
           <p className="text-support-300">Controle as barbearias cadastradas na plataforma</p>
         </div>
-        <Button 
+        <Button
           onClick={() => setIsModalOpen(true)}
           className="bg-[var(--tenant-accent)] text-base-950 hover:opacity-90 font-medium"
         >
@@ -133,7 +151,7 @@ export const TenantsPage: React.FC = () => {
       <Card className="bg-base-900 border border-base-800 p-6 space-y-4">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex-1 w-full">
-            <Input 
+            <Input
               placeholder="Buscar por nome, slug ou e-mail..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -168,19 +186,19 @@ export const TenantsPage: React.FC = () => {
           </div>
         </div>
 
-        <TenantsTable tenants={filteredTenants} onToggleStatus={handleToggleStatus} />
+        {loading ? (
+          <p className="text-center text-support-400 py-10">Carregando barbearias...</p>
+        ) : (
+          <TenantsTable tenants={filteredTenants} onToggleStatus={handleToggleStatus} />
+        )}
       </Card>
 
       {/* Add Tenant Modal */}
-      <Modal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
-        title="Cadastrar Nova Barbearia (Tenant)"
-      >
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Cadastrar Nova Barbearia (Tenant)">
         <form onSubmit={handleAddTenant} className="space-y-4 mt-2">
           <div>
             <label className="block text-xs text-support-300 mb-1">Nome da Barbearia</label>
-            <Input 
+            <Input
               placeholder="Ex: Barbearia da Esquina"
               value={newNome}
               onChange={(e) => setNewNome(e.target.value)}
@@ -189,7 +207,7 @@ export const TenantsPage: React.FC = () => {
           </div>
           <div>
             <label className="block text-xs text-support-300 mb-1">Slug da URL pública</label>
-            <Input 
+            <Input
               placeholder="Ex: esquina (ficará /esquina)"
               value={newSlug}
               onChange={(e) => setNewSlug(e.target.value)}
@@ -210,7 +228,7 @@ export const TenantsPage: React.FC = () => {
           </div>
           <div>
             <label className="block text-xs text-support-300 mb-1">E-mail de Contato</label>
-            <Input 
+            <Input
               type="email"
               placeholder="admin@barbearia.com"
               value={newEmail}
@@ -220,7 +238,7 @@ export const TenantsPage: React.FC = () => {
           </div>
           <div>
             <label className="block text-xs text-support-300 mb-1">Telefone</label>
-            <Input 
+            <Input
               placeholder="(11) 98888-7777"
               value={newTelefone}
               onChange={(e) => setNewTelefone(e.target.value)}
@@ -228,17 +246,14 @@ export const TenantsPage: React.FC = () => {
             />
           </div>
           <div className="flex gap-3 justify-end pt-4 border-t border-base-800">
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               onClick={() => setIsModalOpen(false)}
               className="bg-base-800 border border-base-750 text-base-100 hover:bg-base-700"
             >
               Cancelar
             </Button>
-            <Button 
-              type="submit"
-              className="bg-[var(--tenant-accent)] text-base-950 hover:opacity-90 font-medium"
-            >
+            <Button type="submit" className="bg-[var(--tenant-accent)] text-base-950 hover:opacity-90 font-medium">
               Cadastrar
             </Button>
           </div>

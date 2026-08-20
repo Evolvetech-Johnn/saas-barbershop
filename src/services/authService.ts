@@ -20,6 +20,18 @@ export const authService = {
     return response;
   },
 
+  async loginAdmin(email: string, password: string): Promise<LoginResponse> {
+    const response = await apiRequest<LoginResponse>('/auth/admin-login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+
+    localStorage.setItem('authToken', response.token);
+    localStorage.setItem('refreshToken', response.refreshToken);
+
+    return response;
+  },
+
   async refreshToken(): Promise<string> {
     const refreshToken = localStorage.getItem('refreshToken');
     if (!refreshToken) {

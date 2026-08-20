@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -9,6 +10,7 @@ export const SuperAdminLoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
+  const { loginAdmin } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -21,17 +23,14 @@ export const SuperAdminLoginPage: React.FC = () => {
     }
 
     setLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    const success = await loginAdmin(email, senha);
     setLoading(false);
 
-    // Hardcode mock admin login for preview
-    if (email === 'admin@saas.com' && senha === 'admin123') {
-      localStorage.setItem('saas_superadmin', 'true');
+    if (success) {
       addToast('Painel Super Admin acessado com sucesso!', 'success');
       navigate('/admin/tenants');
     } else {
-      addToast('Credenciais inválidas! Use admin@saas.com e admin123.', 'error');
+      addToast('Credenciais inválidas ou usuário sem permissão de admin.', 'error');
     }
   };
 
@@ -48,7 +47,7 @@ export const SuperAdminLoginPage: React.FC = () => {
             <label className="block text-sm text-support-200 mb-2">E-mail de Admin</label>
             <Input
               type="email"
-              placeholder="admin@saas.com"
+              placeholder="admin@barbearia-saas.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
@@ -66,7 +65,6 @@ export const SuperAdminLoginPage: React.FC = () => {
               disabled={loading}
               className="bg-base-950 border-base-800 text-base-100 placeholder:text-support-400"
             />
-            <p className="text-xs text-support-400 mt-2">Dica: admin@saas.com / admin123</p>
           </div>
 
           <Button

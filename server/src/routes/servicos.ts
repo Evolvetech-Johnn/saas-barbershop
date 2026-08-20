@@ -1,8 +1,9 @@
 import { ServicoService } from '../services/servicoService';
-import { z } from 'zod';
+import { requireAuth } from '../middlewares/authMiddleware';
 
+// GET fica público: a página de agendamento do cliente final (sem login)
+// precisa listar os serviços da barbearia pra montar o booking.
 const servicosRoutes = async (fastify: any, opts: any) => {
-  // Get all servicos by tenant
   fastify.get('/servicos', async (request: any, reply: any) => {
     try {
       const tenantId = request.headers['x-tenant-id'] as string;
@@ -16,7 +17,6 @@ const servicosRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  // Get servico by ID
   fastify.get('/servicos/:id', async (request: any, reply: any) => {
     try {
       const tenantId = request.headers['x-tenant-id'] as string;
@@ -33,28 +33,18 @@ const servicosRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  // Create new servico
-  fastify.post('/servicos', async (request: any, reply: any) => {
+  fastify.post('/servicos', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const novoServico = await ServicoService.create({ ...request.body, tenantId });
+      const novoServico = await ServicoService.create({ ...request.body, tenantId: request.tenantId });
       return reply.status(201).send(novoServico);
     } catch (error: any) {
       return reply.status(500).send({ error: error.message });
     }
   });
 
-  // Update servico
-  fastify.put('/servicos/:id', async (request: any, reply: any) => {
+  fastify.put('/servicos/:id', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const atualizado = await ServicoService.update(tenantId, request.params.id, request.body);
+      const atualizado = await ServicoService.update(request.tenantId, request.params.id, request.body);
       if (!atualizado) {
         return reply.status(404).send({ error: 'Servico not found' });
       }
@@ -64,14 +54,9 @@ const servicosRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  // Delete servico
-  fastify.delete('/servicos/:id', async (request: any, reply: any) => {
+  fastify.delete('/servicos/:id', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const deletado = await ServicoService.softDelete(tenantId, request.params.id);
+      const deletado = await ServicoService.softDelete(request.tenantId, request.params.id);
       if (!deletado) {
         return reply.status(404).send({ error: 'Servico not found' });
       }

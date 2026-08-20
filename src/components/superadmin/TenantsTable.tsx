@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TenantSaaSDetails } from '@/data/mockSaaS';
+import { TenantSaaSDetails } from '@/services/superadminService';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 

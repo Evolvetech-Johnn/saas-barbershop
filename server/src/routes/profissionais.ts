@@ -1,8 +1,9 @@
 import { ProfissionalService } from '../services/profissionalService';
-import { z } from 'zod';
+import { requireAuth } from '../middlewares/authMiddleware';
 
+// GET fica público: a página de agendamento do cliente final (sem login)
+// precisa listar os profissionais da barbearia pra montar o booking.
 const profissionaisRoutes = async (fastify: any, opts: any) => {
-  // Get all profissionais by tenant
   fastify.get('/profissionais', async (request: any, reply: any) => {
     try {
       const tenantId = request.headers['x-tenant-id'] as string;
@@ -16,7 +17,6 @@ const profissionaisRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  // Get profissional by ID
   fastify.get('/profissionais/:id', async (request: any, reply: any) => {
     try {
       const tenantId = request.headers['x-tenant-id'] as string;
@@ -32,28 +32,19 @@ const profissionaisRoutes = async (fastify: any, opts: any) => {
       return reply.status(500).send({ error: error.message });
     }
   });
-  // Create new profissional
-  fastify.post('/profissionais', async (request: any, reply: any) => {
+
+  fastify.post('/profissionais', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const newProfissional = await ProfissionalService.create({ ...request.body, tenantId });
+      const newProfissional = await ProfissionalService.create({ ...request.body, tenantId: request.tenantId });
       return reply.status(201).send(newProfissional);
     } catch (error: any) {
       return reply.status(500).send({ error: error.message });
     }
   });
 
-  // Update profissional
-  fastify.put('/profissionais/:id', async (request: any, reply: any) => {
+  fastify.put('/profissionais/:id', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const updated = await ProfissionalService.update(tenantId, request.params.id, request.body);
+      const updated = await ProfissionalService.update(request.tenantId, request.params.id, request.body);
       if (!updated) {
         return reply.status(404).send({ error: 'Profissional not found' });
       }
@@ -63,14 +54,9 @@ const profissionaisRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  // Delete (soft delete) profissional
-  fastify.delete('/profissionais/:id', async (request: any, reply: any) => {
+  fastify.delete('/profissionais/:id', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const deleted = await ProfissionalService.softDelete(tenantId, request.params.id);
+      const deleted = await ProfissionalService.softDelete(request.tenantId, request.params.id);
       if (!deleted) {
         return reply.status(404).send({ error: 'Profissional not found' });
       }

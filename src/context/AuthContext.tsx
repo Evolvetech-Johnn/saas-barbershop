@@ -7,6 +7,7 @@ import { useTenant } from './TenantContext';
 interface AuthContextType {
   usuario: Usuario | null;
   login: (email: string, senha: string) => Promise<boolean>;
+  loginAdmin: (email: string, senha: string) => Promise<boolean>;
   logout: () => void;
   loading: boolean;
 }
@@ -33,6 +34,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return true;
   };
 
+  const loginAdmin = async (email: string, senha: string): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const response = await authService.loginAdmin(email, senha);
+      setUsuario(response.user);
+    } catch (err) {
+      console.error('Erro no login de admin:', err);
+      setLoading(false);
+      return false;
+    }
+    setLoading(false);
+    return true;
+  };
+
   const logout = async () => {
     try {
       await authService.logout();
@@ -43,7 +58,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ usuario, login, logout, loading }}>
+    <AuthContext.Provider value={{ usuario, login, loginAdmin, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

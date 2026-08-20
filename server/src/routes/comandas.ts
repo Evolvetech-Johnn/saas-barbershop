@@ -1,28 +1,19 @@
 import { ComandaService } from '../services/comandaService';
+import { requireAuth } from '../middlewares/authMiddleware';
 
 const comandasRoutes = async (fastify: any, opts: any) => {
-  // Get all
-  fastify.get('/comandas', async (request: any, reply: any) => {
+  fastify.get('/comandas', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const comandas = await ComandaService.getAll(tenantId);
+      const comandas = await ComandaService.getAll(request.tenantId);
       return reply.send(comandas);
     } catch (error: any) {
       return reply.status(500).send({ error: error.message });
     }
   });
 
-  // Get by ID
-  fastify.get('/comandas/:id', async (request: any, reply: any) => {
+  fastify.get('/comandas/:id', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const comanda = await ComandaService.getById(tenantId, request.params.id);
+      const comanda = await ComandaService.getById(request.tenantId, request.params.id);
       if (!comanda) {
         return reply.status(404).send({ error: 'Comanda not found' });
       }
@@ -32,28 +23,18 @@ const comandasRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  // Create
-  fastify.post('/comandas', async (request: any, reply: any) => {
+  fastify.post('/comandas', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const nova = await ComandaService.create({ ...request.body, tenantId });
+      const nova = await ComandaService.create({ ...request.body, tenantId: request.tenantId });
       return reply.status(201).send(nova);
     } catch (error: any) {
       return reply.status(500).send({ error: error.message });
     }
   });
 
-  // Update
-  fastify.put('/comandas/:id', async (request: any, reply: any) => {
+  fastify.put('/comandas/:id', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const atualizada = await ComandaService.update(tenantId, request.params.id, request.body);
+      const atualizada = await ComandaService.update(request.tenantId, request.params.id, request.body);
       if (!atualizada) {
         return reply.status(404).send({ error: 'Comanda not found' });
       }
@@ -63,14 +44,9 @@ const comandasRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  // Delete
-  fastify.delete('/comandas/:id', async (request: any, reply: any) => {
+  fastify.delete('/comandas/:id', { preHandler: requireAuth }, async (request: any, reply: any) => {
     try {
-      const tenantId = request.headers['x-tenant-id'] as string;
-      if (!tenantId) {
-        return reply.status(400).send({ error: 'Tenant ID is required' });
-      }
-      const deletada = await ComandaService.softDelete(tenantId, request.params.id);
+      const deletada = await ComandaService.softDelete(request.tenantId, request.params.id);
       if (!deletada) {
         return reply.status(404).send({ error: 'Comanda not found' });
       }

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { mockSaaSPlans, SaaSPlan } from '@/data/mockSaaS';
+import React, { useEffect, useState } from 'react';
+import { superadminService, SaaSPlan } from '@/services/superadminService';
 import { PlanoSaaSCard } from '@/components/superadmin/PlanoSaaSCard';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
@@ -7,25 +7,34 @@ import { Button } from '@/components/ui/Button';
 import { useToast } from '@/context/ToastContext';
 
 export const PlanosSaaSPage: React.FC = () => {
-  const [plans, setPlans] = useState<SaaSPlan[]>(mockSaaSPlans);
+  const [plans, setPlans] = useState<SaaSPlan[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<SaaSPlan | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { addToast } = useToast();
 
-  // Edit fields state
   const [editPreco, setEditPreco] = useState('');
   const [editLimitProfissionais, setEditLimitProfissionais] = useState('');
   const [editLimitServicos, setEditLimitServicos] = useState('');
 
+  useEffect(() => {
+    superadminService
+      .getPlanos()
+      .then(setPlans)
+      .catch(() => addToast('Erro ao carregar planos.', 'error'))
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleEditPlanClick = (plan: SaaSPlan) => {
     setSelectedPlan(plan);
     setEditPreco(String(plan.preco));
-    setEditLimitProfissionais(String(plan.limiteProfissionais));
-    setEditLimitServicos(String(plan.limiteServicos));
+    setEditLimitProfissionais(plan.limiteProfissionais === null ? 'ilimitado' : String(plan.limiteProfissionais));
+    setEditLimitServicos(plan.limiteServicos === null ? 'ilimitado' : String(plan.limiteServicos));
     setIsModalOpen(true);
   };
 
-  const handleSavePlan = (e: React.FormEvent) => {
+  const handleSavePlan = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlan) return;
 
@@ -35,20 +44,17 @@ export const PlanosSaaSPage: React.FC = () => {
       return;
     }
 
-    setPlans(prev => prev.map(p => {
-      if (p.id === selectedPlan.id) {
-        return {
-          ...p,
-          preco: updatedPrice,
-          limiteProfissionais: editLimitProfissionais === 'ilimitado' ? 'ilimitado' : parseInt(editLimitProfissionais) || 0,
-          limiteServicos: editLimitServicos === 'ilimitado' ? 'ilimitado' : parseInt(editLimitServicos) || 0,
-        };
-      }
-      return p;
-    }));
+    const limiteProfissionais = editLimitProfissionais === 'ilimitado' ? null : parseInt(editLimitProfissionais) || 0;
+    const limiteServicos = editLimitServicos === 'ilimitado' ? null : parseInt(editLimitServicos) || 0;
 
-    setIsModalOpen(false);
-    addToast('Preço e limites do plano atualizados com sucesso!', 'success');
+    try {
+      const atualizado = await superadminService.updatePlano(selectedPlan.id, { preco: updatedPrice, limiteProfissionais, limiteServicos });
+      setPlans((prev) => prev.map((p) => (p.id === selectedPlan.id ? { ...p, ...atualizado } : p)));
+      setIsModalOpen(false);
+      addToast('Preço e limites do plano atualizados com sucesso!', 'success');
+    } catch {
+      addToast('Erro ao salvar o plano.', 'error');
+    }
   };
 
   return (
@@ -58,22 +64,18 @@ export const PlanosSaaSPage: React.FC = () => {
         <p className="text-support-300">Monitore e configure os planos de assinatura disponibilizados na plataforma</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {plans.map((plan) => (
-          <PlanoSaaSCard 
-            key={plan.id} 
-            plan={plan} 
-            onEdit={handleEditPlanClick} 
-          />
-        ))}
-      </div>
+      {loading ? (
+        <p className="text-center text-support-400 py-10">Carregando planos...</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {plans.map((plan) => (
+            <PlanoSaaSCard key={plan.id} plan={plan} onEdit={handleEditPlanClick} />
+          ))}
+        </div>
+      )}
 
       {/* Edit Plan Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={`Configurar Plano: ${selectedPlan?.nome}`}
-      >
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={`Configurar Plano: ${selectedPlan?.nome}`}>
         {selectedPlan && (
           <form onSubmit={handleSavePlan} className="space-y-4 mt-2">
             <div>
@@ -112,10 +114,7 @@ export const PlanosSaaSPage: React.FC = () => {
               >
                 Cancelar
               </Button>
-              <Button
-                type="submit"
-                className="bg-[var(--tenant-accent)] text-base-950 hover:opacity-90 font-medium"
-              >
+              <Button type="submit" className="bg-[var(--tenant-accent)] text-base-950 hover:opacity-90 font-medium">
                 Salvar Alterações
               </Button>
             </div>
