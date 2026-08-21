@@ -36,7 +36,7 @@ create table tenants (
   nome varchar not null,
   logo_url varchar,
   cor_acento varchar not null default '#3b82f6',
-  plano_saas varchar not null default 'start' check (plano_saas in ('start','pro','premium')),
+  plano_saas varchar not null default 'start' check (plano_saas in ('start','pro','premium','franquia')),
   status varchar not null default 'ativo' check (status in ('ativo','inativo','vencido')),
   data_criacao timestamptz not null default now(),
   data_vencimento_plano timestamptz not null,
@@ -58,7 +58,7 @@ create index on tenants (status, plano_saas);
 -- barbearia (tenant) oferece aos próprios clientes.
 create table planos_saas (
   id uuid primary key default uuid_generate_v4(),
-  codigo varchar not null unique check (codigo in ('start','pro','premium')),
+  codigo varchar not null unique check (codigo in ('start','pro','premium','franquia')),
   nome varchar not null,
   preco numeric(10,2) not null check (preco >= 0),
   limite_profissionais int,
@@ -356,5 +356,6 @@ create policy "anon cria agendamento" on agendamentos for insert to anon with ch
 insert into planos_saas (codigo, nome, preco, limite_profissionais, limite_servicos, limite_clientes, recursos) values
   ('start', 'Start', 49.90, 2, 10, 100, array['Agenda Online Simplificada','Até 2 Profissionais','Até 10 Serviços','Relatórios Básicos de Faturamento']),
   ('pro', 'Pro', 99.90, 5, null, null, array['Tudo do Plano Start','Até 5 Profissionais','Serviços e Clientes Ilimitados','Módulo de Estoque e Produtos','Módulo de Comissões Avançado']),
-  ('premium', 'Premium', 199.90, null, null, null, array['Tudo do Plano Pro','Profissionais Ilimitados','Planos de Fidelidade / Assinaturas','Relatórios e BI Avançado','Suporte Prioritário'])
+  ('premium', 'Premium', 199.90, null, null, null, array['Tudo do Plano Pro','Profissionais Ilimitados','Planos de Fidelidade / Assinaturas','Relatórios e BI Avançado','Suporte Prioritário']),
+  ('franquia', 'Franquia / Rede', 349.90, null, null, null, array['Tudo do Plano Premium','Suporte para múltiplas filiais (uma unidade por cadastro)','Gerente de conta dedicado','Relatórios consolidados sob demanda','Onboarding assistido por unidade'])
 on conflict (codigo) do nothing;

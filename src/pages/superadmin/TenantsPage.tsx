@@ -20,7 +20,7 @@ export const TenantsPage: React.FC = () => {
   // Add Tenant Form State
   const [newNome, setNewNome] = useState('');
   const [newSlug, setNewSlug] = useState('');
-  const [newPlano, setNewPlano] = useState<'start' | 'pro' | 'premium'>('start');
+  const [newPlano, setNewPlano] = useState<'start' | 'pro' | 'premium' | 'franquia'>('start');
   const [newEmail, setNewEmail] = useState('');
   const [newTelefone, setNewTelefone] = useState('');
 
@@ -218,12 +218,13 @@ export const TenantsPage: React.FC = () => {
             <label className="block text-xs text-support-300 mb-1">Plano SaaS Inicial</label>
             <Select
               value={newPlano}
-              onChange={(e) => setNewPlano(e.target.value as 'start' | 'pro' | 'premium')}
+              onChange={(e) => setNewPlano(e.target.value as 'start' | 'pro' | 'premium' | 'franquia')}
               className="bg-base-950 border-base-800 text-base-100 text-sm w-full"
             >
               <option value="start">Start (R$ 49,90/mês)</option>
               <option value="pro">Pro (R$ 99,90/mês)</option>
               <option value="premium">Premium (R$ 199,90/mês)</option>
+              <option value="franquia">Franquia / Rede (R$ 349,90/mês)</option>
             </Select>
           </div>
           <div>

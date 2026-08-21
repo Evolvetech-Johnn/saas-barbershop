@@ -4,7 +4,7 @@ export interface TenantSaaSDetails {
   id: string;
   nome: string;
   slug: string;
-  planoSaas: 'start' | 'pro' | 'premium';
+  planoSaas: 'start' | 'pro' | 'premium' | 'franquia';
   status: 'ativo' | 'inativo' | 'vencido';
   dataCriacao: string;
   dataVencimentoPlano: string;
@@ -18,7 +18,7 @@ export interface TenantSaaSDetails {
 
 export interface SaaSPlan {
   id: string;
-  codigo: 'start' | 'pro' | 'premium';
+  codigo: 'start' | 'pro' | 'premium' | 'franquia';
   nome: string;
   preco: number;
   limiteProfissionais: number | null;

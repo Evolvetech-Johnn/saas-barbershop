@@ -6,7 +6,7 @@ import { gerarSenhaTemporaria } from '../lib/senhaTemporaria';
 
 export interface PlanoSaas {
   id: string;
-  codigo: 'start' | 'pro' | 'premium';
+  codigo: 'start' | 'pro' | 'premium' | 'franquia';
   nome: string;
   preco: number;
   limiteProfissionais: number | null;

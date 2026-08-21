@@ -27,6 +27,8 @@ export const TenantsTable: React.FC<TenantsTableProps> = ({ tenants, onToggleSta
 
   const getPlanBadge = (plan: TenantSaaSDetails['planoSaas']) => {
     switch (plan) {
+      case 'franquia':
+        return <Badge className="bg-purple-950 text-purple-300 border border-purple-800">Franquia</Badge>;
       case 'premium':
         return <Badge className="bg-yellow-950 text-yellow-300 border border-yellow-800">Premium</Badge>;
       case 'pro':

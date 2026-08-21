@@ -7,7 +7,7 @@ export interface Tenant {
   nome: string;
   logoUrl?: string;
   corAcento: string;
-  planoSaas: 'start' | 'pro' | 'premium';
+  planoSaas: 'start' | 'pro' | 'premium' | 'franquia';
   status: 'ativo' | 'inativo' | 'vencido';
   dataCriacao: string;
   dataVencimentoPlano: string;

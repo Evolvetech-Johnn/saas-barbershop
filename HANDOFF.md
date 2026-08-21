@@ -11,7 +11,7 @@ Documento de retomada. Escrito ao final de uma sessão longa que levou o projeto
 | Banco | Supabase (Postgres) | No ar |
 | Upload de imagem | Cloudinary | Configurado e testado |
 | Pagamento | Stripe | **Não configurado** — decisão deliberada, sem cliente ainda não faz sentido |
-| Repo | `github.com/Evolvetech-Johnn/saas-barbershop`, branch `main` | Tudo commitado (`e8ddcad`) |
+| Repo | `github.com/Evolvetech-Johnn/saas-barbershop`, branch `main` | Commit `e8ddcad` + **mudanças locais não commitadas** (ver abaixo) |
 
 ### Logins de teste que já existem no banco
 - Superadmin: `admin@barbearia-saas.com` / `admin123` — tenant "Painel SaaS Admin", slug `plataforma-admin`
@@ -53,6 +53,23 @@ Documento de retomada. Escrito ao final de uma sessão longa que levou o projeto
 7. **Página pública de verdade**: "Serviços" e "Equipe" na landing page eram 100% hardcoded (nomes fixos tipo "João Silva", "Corte Clássico", iguais pra qualquer tenant) — reescrito pra usar dados reais. Disponibilidade de horário no agendamento público também era mockada — agora calcula de verdade contra os agendamentos existentes (`GET /agendamentos/disponibilidade`).
 8. **Cloudinary**: upload de logo e galeria de fotos, com fallback gracioso se as credenciais não estiverem configuradas (não derruba o servidor).
 9. **Deploy**: `Dockerfile` do backend, `VITE_API_URL` configurável, publicado em Vercel + Render, testado ponta a ponta em produção (login real, CORS liberado, upload funcionando).
+
+## Mudanças locais não commitadas (sessão atual)
+
+Adição de um 4º plano SaaS, **"Franquia / Rede"** (R$ 349,90/mês), ao lado de Start/Pro/Premium. Consistente em todos os pontos que precisam saber sobre os planos:
+
+- `supabase-schema.sql`: `check (plano_saas in (...))` em `tenants`, `check (codigo in (...))` em `planos_saas`, e nova linha no `insert into planos_saas` (seed) com recursos: multi-filial, gerente de conta dedicado, relatórios consolidados, onboarding assistido.
+- `server/src/services/tenantService.ts` e `server/src/services/superadminService.ts`: union type `'start' | 'pro' | 'premium' | 'franquia'`.
+- `src/types/tenant.ts` e `src/services/superadminService.ts` (frontend): mesmo union type espelhado.
+- `src/pages/superadmin/TenantsPage.tsx`: novo `<option>` no select de criação de tenant.
+- `docs/plano-geral.md`: doc de referência do tipo `Tenant` atualizada.
+
+**Status:**
+- ~~Constraint `check` e `insert` do plano novo no Supabase de produção~~ **Aplicado manualmente pelo usuário no SQL editor, com sucesso.**
+- ~~Gap: `TenantsTable.tsx`/`TenantDetalhePage.tsx` sem `case 'franquia'` no badge~~ **Corrigido** — badge roxo adicionado nos dois `switch`.
+- Não foi mexido em Stripe (preço/produto do plano Franquia não existe lá — coerente com Stripe ainda não estar configurado).
+- Falta commitar as mudanças locais (código + `supabase-schema.sql`, que agora reflete o que já está em produção).
+- `server/src/scripts/seed.ts` não precisa de mudança — só usa `'premium'` como dado de exemplo nos tenants seedados, não como validação.
 
 ## Onde estão as credenciais
 
