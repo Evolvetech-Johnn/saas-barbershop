@@ -71,6 +71,20 @@ Adição de um 4º plano SaaS, **"Franquia / Rede"** (R$ 349,90/mês), ao lado d
 - Falta commitar as mudanças locais (código + `supabase-schema.sql`, que agora reflete o que já está em produção).
 - `server/src/scripts/seed.ts` não precisa de mudança — só usa `'premium'` como dado de exemplo nos tenants seedados, não como validação.
 
+## Automações do Claude Code neste projeto
+
+Configuradas em `.claude/` pra atacar as dores documentadas acima. Todas versionadas (exceto `settings.local.json`).
+
+- **`.claude/launch.json`**: entradas `frontend` (porta 5173) e `backend` (`npm run dev --prefix server`, porta 3001) — abre os dois com a skill `run` em vez de dois terminais manuais.
+- **`.claude/settings.json` → hooks**:
+  - `PostToolUse` em `Write|Edit`: se o arquivo editado for `supabase-schema.sql`, imprime lembrete pra aplicar manualmente no SQL Editor de produção do Supabase.
+  - `PreToolUse` em `Bash(git push*)`: roda `npx tsc --noEmit` na raiz e em `server/` antes do push; bloqueia se algum falhar.
+  - **Nota**: hooks recém-criados só passam a valer depois de reabrir `/hooks` uma vez ou reiniciar a sessão do Claude Code (o watcher de config só observa diretórios que já tinham `settings.json` quando a sessão começou).
+- **`.claude/agents/tenant-isolation.md`**: subagente especializado em auditar `server/src/routes/*.ts` procurando handlers sem `requireAuth`/`requireAdmin` ou lendo `tenantId` de header em vez do JWT — o padrão de bug que já causou o incidente de segurança real deste projeto.
+- **`.claude/commands/sync-schema.md`** (`/sync-schema`): mostra o diff do `supabase-schema.sql` e extrai só o SQL necessário pra colar no editor de produção.
+- **`.claude/commands/deploy-check.md`** (`/deploy-check`): roda tsc + testes nos dois workspaces e resume as pendências do handoff relevantes antes de um push.
+- **MCP do Supabase**: ainda não autorizado pro projeto certo (`pxnruoruotkeyqnvlmet`) — os projetos conectados agora são outros (`LP Evolve`, `imc-invest`). Autorizar isso elimina o passo manual do SQL Editor de vez; precisa ser feito via configurações de conector do claude.ai (fora do alcance de uma sessão não-interativa).
+
 ## Onde estão as credenciais
 
 - **Local**: `server/.env` (não versionado — veja `server/.env.example` pro template)

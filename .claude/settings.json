@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{var j=JSON.parse(d);var f=(j.tool_input&&j.tool_input.file_path)||'';if(f.endsWith('supabase-schema.sql')){console.log(JSON.stringify({systemMessage:'supabase-schema.sql mudou - aplique manualmente essa alteracao no SQL Editor de producao do Supabase (nao ha migration runner neste projeto).'}))}}catch(e){}})\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git push*)",
+            "command": "npx tsc --noEmit -p . && npx tsc --noEmit -p server && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"allow\"}}' || echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"tsc --noEmit falhou no frontend ou no backend. Rode npx tsc --noEmit (raiz e server/) manualmente para ver os erros antes de fazer push.\"}}'",
+            "timeout": 120,
+            "statusMessage": "Rodando tsc --noEmit (frontend + backend) antes do push..."
+          }
+        ]
+      }
+    ]
+  }
+}
