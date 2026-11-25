@@ -1,3 +1,4 @@
+import { sendError } from '../lib/httpError';
 import { ClienteService } from '../services/clienteService';
 import { requireAuth } from '../middlewares/authMiddleware';
 
@@ -8,7 +9,7 @@ const clientesRoutes = async (fastify: any, opts: any) => {
       const clientes = await ClienteService.getAll(request.tenantId);
       return reply.send(clientes);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -21,7 +22,7 @@ const clientesRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(cliente);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -31,7 +32,7 @@ const clientesRoutes = async (fastify: any, opts: any) => {
       const novoCliente = await ClienteService.create({ ...request.body, tenantId: request.tenantId });
       return reply.status(201).send(novoCliente);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -44,7 +45,7 @@ const clientesRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(atualizado);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -57,7 +58,7 @@ const clientesRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send({ success: true });
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 };

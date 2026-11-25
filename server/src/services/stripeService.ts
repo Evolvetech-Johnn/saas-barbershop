@@ -1,3 +1,4 @@
+import { AppError } from '../lib/httpError';
 import Stripe from 'stripe';
 import { stripe } from '../lib/stripe';
 import { supabase } from '../lib/supabase';
@@ -18,7 +19,7 @@ export class StripeService {
   static async createCheckoutSession(tenantId: string, planoSaasId: string, email?: string) {
     const { data: plano, error: planoError } = await supabase.from('planos_saas').select('*').eq('id', planoSaasId).single();
     if (planoError) throw new Error(planoError.message);
-    if (!plano.stripe_price_id) throw new Error('Este plano ainda não tem um Stripe Price ID configurado.');
+    if (!plano.stripe_price_id) throw new AppError('Este plano ainda não tem um Stripe Price ID configurado.', 422);
 
     const customerId = await getOrCreateStripeCustomer(tenantId, email);
 
@@ -38,7 +39,7 @@ export class StripeService {
   static async createPortalSession(tenantId: string) {
     const { data: tenant, error } = await supabase.from('tenants').select('stripe_customer_id').eq('id', tenantId).single();
     if (error) throw new Error(error.message);
-    if (!tenant.stripe_customer_id) throw new Error('Este tenant ainda não tem uma assinatura Stripe.');
+    if (!tenant.stripe_customer_id) throw new AppError('Este tenant ainda não tem uma assinatura Stripe.', 422);
 
     const session = await stripe.billingPortal.sessions.create({
       customer: tenant.stripe_customer_id,

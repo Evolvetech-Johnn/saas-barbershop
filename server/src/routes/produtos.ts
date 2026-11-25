@@ -1,3 +1,4 @@
+import { sendError } from '../lib/httpError';
 import { ProdutoService } from '../services/produtoService';
 import { requireAuth } from '../middlewares/authMiddleware';
 
@@ -7,7 +8,7 @@ const produtosRoutes = async (fastify: any, opts: any) => {
       const produtos = await ProdutoService.getAll(request.tenantId);
       return reply.send(produtos);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -19,7 +20,7 @@ const produtosRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(produto);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -28,7 +29,7 @@ const produtosRoutes = async (fastify: any, opts: any) => {
       const novo = await ProdutoService.create({ ...request.body, tenantId: request.tenantId });
       return reply.status(201).send(novo);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -40,7 +41,7 @@ const produtosRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(atualizado);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -52,7 +53,7 @@ const produtosRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send({ success: true });
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -62,7 +63,7 @@ const produtosRoutes = async (fastify: any, opts: any) => {
       const criados = await Promise.all(produtos.map((p: any) => ProdutoService.create({ ...p, tenantId: request.tenantId })));
       return reply.status(201).send(criados);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 };

@@ -22,7 +22,8 @@ const uploadRoutes = async (fastify: any, opts: any) => {
 
       return reply.send({ url: resultado.secure_url });
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message || 'Falha no upload da imagem' });
+      reply.log.error({ err: error }, 'falha no upload');
+      return reply.status(500).send({ error: 'Falha no upload da imagem' });
     }
   });
 };

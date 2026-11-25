@@ -1,3 +1,4 @@
+import { sendError } from '../lib/httpError';
 import { ServicoService } from '../services/servicoService';
 import { requireAuth } from '../middlewares/authMiddleware';
 
@@ -13,7 +14,7 @@ const servicosRoutes = async (fastify: any, opts: any) => {
       const servicos = await ServicoService.getAll(tenantId);
       return reply.send(servicos);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -29,7 +30,7 @@ const servicosRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(servico);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -38,7 +39,7 @@ const servicosRoutes = async (fastify: any, opts: any) => {
       const novoServico = await ServicoService.create({ ...request.body, tenantId: request.tenantId });
       return reply.status(201).send(novoServico);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -50,7 +51,7 @@ const servicosRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(atualizado);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -62,7 +63,7 @@ const servicosRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send({ success: true });
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 };

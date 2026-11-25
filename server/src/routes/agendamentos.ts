@@ -1,3 +1,4 @@
+import { sendError } from '../lib/httpError';
 import { AgendamentoService } from '../services/agendamentoService';
 import { requireAuth } from '../middlewares/authMiddleware';
 
@@ -9,7 +10,7 @@ const agendamentosRoutes = async (fastify: any, opts: any) => {
       const agendamentos = await AgendamentoService.getAll(request.tenantId, startDate, endDate);
       return reply.send(agendamentos);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -22,7 +23,7 @@ const agendamentosRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(agendamento);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -42,7 +43,7 @@ const agendamentosRoutes = async (fastify: any, opts: any) => {
       const horarios = await AgendamentoService.getHorariosDisponiveis(tenantId, profissionalId, data, Number(duracaoMinutos));
       return reply.send(horarios);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -60,10 +61,7 @@ const agendamentosRoutes = async (fastify: any, opts: any) => {
         const novo = await AgendamentoService.create({ ...request.body, tenantId });
         return reply.status(201).send(novo);
       } catch (error: any) {
-        if (error.message.includes('conflitante')) {
-          return reply.status(409).send({ error: error.message });
-        }
-        return reply.status(500).send({ error: error.message });
+        return sendError(reply, error);
       }
     }
   );
@@ -77,10 +75,7 @@ const agendamentosRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(atualizado);
     } catch (error: any) {
-      if (error.message.includes('conflitante')) {
-        return reply.status(409).send({ error: error.message });
-      }
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -93,7 +88,7 @@ const agendamentosRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send({ success: true });
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 };

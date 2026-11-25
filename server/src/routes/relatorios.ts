@@ -1,3 +1,4 @@
+import { sendError } from '../lib/httpError';
 import { supabase } from '../lib/supabase';
 import { requireAuth } from '../middlewares/authMiddleware';
 
@@ -131,7 +132,7 @@ const relatoriosRoutes = async (fastify: any, opts: any) => {
         stockAlerts: formattedStockAlerts,
       });
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 };

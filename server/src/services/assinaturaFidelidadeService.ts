@@ -1,3 +1,4 @@
+import { AppError } from '../lib/httpError';
 import { supabase } from '../lib/supabase';
 import { rowToCamel } from '../lib/db';
 
@@ -25,7 +26,7 @@ export class AssinaturaFidelidadeService {
       .eq('cliente_id', clienteId)
       .eq('status', 'ativo')
       .maybeSingle();
-    if (existing) throw new Error('Cliente já possui uma assinatura ativa.');
+    if (existing) throw new AppError('Cliente já possui uma assinatura ativa.', 400);
 
     const { data, error } = await supabase
       .from('assinaturas_fidelidade')

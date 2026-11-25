@@ -1,3 +1,4 @@
+import { sendError } from '../lib/httpError';
 import { TenantService } from '../services/tenantService';
 import { requireAuth } from '../middlewares/authMiddleware';
 import { isReservedSlug } from '../lib/reservedSlugs';
@@ -28,7 +29,7 @@ const tenantsRoutes = async (fastify: any, opts: any) => {
       // lista pública: só barbearias ativas, sem o tenant interno da plataforma
       return reply.send(tenants.filter((t) => t.status === 'ativo' && t.slug !== PLATFORM_SLUG).map(toPublicTenant));
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -40,7 +41,7 @@ const tenantsRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(await viewFor(request, tenant));
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -52,7 +53,7 @@ const tenantsRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(await viewFor(request, tenant));
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -73,7 +74,7 @@ const tenantsRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(toOwnerTenant(updatedTenant));
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 };

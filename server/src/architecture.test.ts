@@ -109,3 +109,18 @@ describe('tenants públicos', () => {
     expect(src).not.toMatch(/TenantService\.update\([^,]+,\s*request\.body/);
   });
 });
+
+describe('vazamento de erro interno', () => {
+  it('nenhuma rota devolve error.message ao cliente', () => {
+    const offenders = walk(ROUTES)
+      .filter((f) => /reply[^;]*\.send\([^;]*(error|err)\.message/.test(read(f)))
+      .map((f) => path.basename(f));
+    expect(offenders).toEqual([]);
+  });
+  it('erros de negócio mostráveis usam AppError, não Error comum com status 4xx', () => {
+    const offenders = walk(ROUTES)
+      .filter((f) => /status\(4\d\d\)\.send\(\{ error: (error|err)\b/.test(read(f)))
+      .map((f) => path.basename(f));
+    expect(offenders).toEqual([]);
+  });
+});

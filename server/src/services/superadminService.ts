@@ -1,3 +1,4 @@
+import { AppError } from '../lib/httpError';
 import bcrypt from 'bcrypt';
 import { supabase } from '../lib/supabase';
 import { rowToCamel, dataToSnake } from '../lib/db';
@@ -57,7 +58,7 @@ export class SuperadminService {
   /** Cria o tenant e já cria o usuário admin dele, para a barbearia conseguir logar de imediato. */
   static async createTenant(data: { nome: string; slug: string; planoSaas: string; email?: string; telefone?: string }) {
     if (isReservedSlug(data.slug)) {
-      throw new Error(`O slug "${data.slug}" é reservado pelo sistema. Escolha outro.`);
+      throw new AppError(`O slug "${data.slug}" é reservado pelo sistema. Escolha outro.`, 400);
     }
 
     const { data: tenant, error } = await supabase

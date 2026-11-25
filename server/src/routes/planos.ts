@@ -1,3 +1,4 @@
+import { sendError } from '../lib/httpError';
 import { PlanoFidelidadeService } from '../services/planoFidelidadeService';
 import { AssinaturaFidelidadeService } from '../services/assinaturaFidelidadeService';
 import { requireAuth } from '../middlewares/authMiddleware';
@@ -9,7 +10,7 @@ const planosRoutes = async (fastify: any, opts: any) => {
       const planos = await PlanoFidelidadeService.getAll(request.tenantId);
       return reply.send(planos);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -19,7 +20,7 @@ const planosRoutes = async (fastify: any, opts: any) => {
       const assinaturas = await AssinaturaFidelidadeService.getAtivas(request.tenantId);
       return reply.send(assinaturas);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -30,10 +31,7 @@ const planosRoutes = async (fastify: any, opts: any) => {
       const assinatura = await AssinaturaFidelidadeService.assinar(request.tenantId, clienteId, planoFidelidadeId);
       return reply.status(201).send(assinatura);
     } catch (error: any) {
-      if (error.message.includes('já possui')) {
-        return reply.status(400).send({ error: error.message });
-      }
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -46,7 +44,7 @@ const planosRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(assinatura);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 };

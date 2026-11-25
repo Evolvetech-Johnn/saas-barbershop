@@ -8,6 +8,7 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { connectDatabase, disconnectDatabase } from './config/database';
 import { assertEnv, jwtSecret } from './lib/env';
+import { errorResponse } from './lib/httpError';
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
   // Use a require import here to avoid TypeScript issues with Fastify's callable type in this project setup.
@@ -18,6 +19,16 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 async function bootstrap() {
   try {
+    // Erros não tratados (ex.: ZodError em body inválido): nunca devolver a mensagem interna
+    server.setErrorHandler((error: any, _req: any, reply: any) => {
+      if (error.name !== 'ZodError' && error.name !== 'AppError' && error.statusCode >= 400 && error.statusCode < 500) {
+        return reply.status(error.statusCode).send({ error: error.statusCode === 429 ? 'Muitas requisições. Aguarde um instante.' : 'Requisição inválida.' });
+      }
+      const { status, body } = errorResponse(error);
+      if (status >= 500) server.log.error({ err: error }, 'erro não tratado');
+      return reply.status(status).send(body);
+    });
+
     assertEnv(); // em produção falha no boot se faltar variável ou o JWT for fraco
     await connectDatabase();
 

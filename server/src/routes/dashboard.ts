@@ -1,3 +1,4 @@
+import { sendError } from '../lib/httpError';
 import { supabase } from '../lib/supabase';
 import { rowToCamel } from '../lib/db';
 import { requireAuth } from '../middlewares/authMiddleware';
@@ -87,7 +88,7 @@ const dashboardRoutes = async (fastify: any, opts: any) => {
         faturamentoSemanal,
       });
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 };

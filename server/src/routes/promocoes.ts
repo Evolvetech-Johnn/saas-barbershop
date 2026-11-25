@@ -26,7 +26,8 @@ const promocoesRoutes = async (fastify: any, opts: any) => {
       const sugestoes = await SmartMarketingService.analisarEGerarSugestoes(request.tenantId);
       return reply.send({ success: true, geradas: sugestoes.length, sugestoes });
     } catch (error: any) {
-      return reply.status(500).send({ message: 'Erro ao gerar sugestões', error: error.message });
+      reply.log.error({ err: error }, 'Erro ao gerar sugestões');
+      return reply.status(500).send({ message: 'Erro ao gerar sugestões' });
     }
   });
 
@@ -55,7 +56,8 @@ const promocoesRoutes = async (fastify: any, opts: any) => {
 
       return reply.send(sugestoes);
     } catch (error: any) {
-      return reply.status(500).send({ message: 'Erro ao buscar sugestões', error: error.message });
+      reply.log.error({ err: error }, 'Erro ao buscar sugestões');
+      return reply.status(500).send({ message: 'Erro ao buscar sugestões' });
     }
   });
 
@@ -84,7 +86,8 @@ const promocoesRoutes = async (fastify: any, opts: any) => {
 
       return reply.send({ success: true, promocao: data[0] });
     } catch (error: any) {
-      return reply.status(500).send({ message: 'Erro ao aprovar sugestão', error: error.message });
+      reply.log.error({ err: error }, 'Erro ao aprovar sugestão');
+      return reply.status(500).send({ message: 'Erro ao aprovar sugestão' });
     }
   });
 };

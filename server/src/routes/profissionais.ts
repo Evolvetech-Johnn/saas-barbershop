@@ -1,3 +1,4 @@
+import { sendError } from '../lib/httpError';
 import { ProfissionalService } from '../services/profissionalService';
 import { requireAuth } from '../middlewares/authMiddleware';
 
@@ -13,7 +14,7 @@ const profissionaisRoutes = async (fastify: any, opts: any) => {
       const profissionais = await ProfissionalService.getAll(tenantId);
       return reply.send(profissionais);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -29,7 +30,7 @@ const profissionaisRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(profissional);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -38,7 +39,7 @@ const profissionaisRoutes = async (fastify: any, opts: any) => {
       const newProfissional = await ProfissionalService.create({ ...request.body, tenantId: request.tenantId });
       return reply.status(201).send(newProfissional);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -50,7 +51,7 @@ const profissionaisRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(updated);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -62,7 +63,7 @@ const profissionaisRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send({ success: true });
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 };

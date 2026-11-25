@@ -1,3 +1,4 @@
+import { sendError } from '../lib/httpError';
 import { ComissaoService } from '../services/comissaoService';
 import { requireAuth } from '../middlewares/authMiddleware';
 
@@ -8,7 +9,7 @@ const comissoesRoutes = async (fastify: any, opts: any) => {
       const comissoes = await ComissaoService.getAll(request.tenantId, profissionalId);
       return reply.send(comissoes);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -20,7 +21,7 @@ const comissoesRoutes = async (fastify: any, opts: any) => {
       }
       return reply.send(atualizada);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 };

@@ -1,3 +1,4 @@
+import { sendError } from '../lib/httpError';
 import { UsuarioService } from '../services/usuarioService';
 import { ProfissionalService } from '../services/profissionalService';
 import { requireAuth } from '../middlewares/authMiddleware';
@@ -13,7 +14,7 @@ const usuariosRoutes = async (fastify: any, opts: any) => {
       const usuarios = await UsuarioService.getAll(request.tenantId);
       return reply.send(usuarios.map(({ senhaHash, ...u }) => u));
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -50,7 +51,7 @@ const usuariosRoutes = async (fastify: any, opts: any) => {
       const { senhaHash, ...usuarioSemSenha } = usuario;
       return reply.status(201).send({ ...usuarioSemSenha, senhaTemporaria });
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -77,7 +78,7 @@ const usuariosRoutes = async (fastify: any, opts: any) => {
       const { senhaHash, ...usuarioSemSenha } = atualizado;
       return reply.send(usuarioSemSenha);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -101,7 +102,7 @@ const usuariosRoutes = async (fastify: any, opts: any) => {
 
       return reply.send({ success: true });
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 };

@@ -12,13 +12,13 @@ Decisão (2026-11-25): **reforçar o projeto atual** (Fastify + React + Supabase
 - [x] `server/src/lib/env.ts`: valida variáveis no boot (falha em produção), remove o fallback `'supersecret'` do JWT
 - [x] `server/src/architecture.test.ts`: toda rota (68) é protegida ou está na lista de públicas; `x-tenant-id` só em rotas públicas; sem fallback de segredo; slugs reservados
 - [x] `supabase/migrations/` com baseline e regra de versionamento
-Verificado: `tsc --noEmit` (server) e `npm test` no server (36 testes backend + 11 frontend). **Não verificado:** frontend, deploy no Render com o novo `assertEnv`.
+Verificado: `tsc --noEmit` (server) e `npm test` no server (42 testes backend + 11 frontend). **Não verificado:** frontend, deploy no Render com o novo `assertEnv`.
 
-## Pendências de segurança (achadas em 2026-11-25; 1 e 2 corrigidas no código)
+## Pendências de segurança (achadas em 2026-11-25; 1, 2 e 4 corrigidas no código)
 1. ~~Escalada de privilégio~~ **Corrigida em 2026-11-25 (código; falta deploy).** `requirePlatformAdmin` exige papel `admin` + claim `platform: true`, emitida só para usuários do tenant `plataforma-admin` (`lib/platform.ts`); `/auth/admin-login` agora busca só nesse tenant; `/auth/refresh` recalcula a claim no banco; o slug `plataforma-admin` virou reservado. 7 testes novos. Efeito: tokens de superadmin antigos perdem acesso até novo login. Resta: `GET /superadmin/planos` segue com `requireAuth` (catálogo, leitura).
 2. ~~`GET /tenants` público vazava tudo~~ **Corrigido (código; falta deploy).** Rotas públicas devolvem só campos de vitrine (`lib/tenantView.ts`); lista pública só com tenants `ativo` e sem `plataforma-admin`; o dono (ou superadmin) recebe a visão completa, sem `stripeCustomerId`. Achado extra no mesmo ponto: `PUT /tenants/:id` repassava o body inteiro, então o dono podia mudar o próprio `planoSaas`, `status` e `dataVencimentoPlano` — agora só campos editáveis (whitelist). Frontend: `AppRoutes` busca o tenant do usuário logado por id. Resta: o seletor de barbearias do `OnboardingPage` ainda lista todas as públicas (resquício do mock; só nome e cor).
 3. **Senha `admin123`** do superadmin documentada no `HANDOFF.md` e ativa em produção: trocar e remover do doc.
-4. Rotas devolvem `error.message` do banco ao cliente (vaza schema). Trocar por mensagem genérica + log.
+4. ~~Rotas devolviam `error.message` ao cliente~~ **Corrigido (código; falta deploy).** `lib/httpError.ts`: `AppError` (mensagem de negócio, pode ir ao cliente) e `sendError` (loga no servidor, responde genérico). ~70 handlers migrados; 8 erros de negócio viraram `AppError` (conflito de horário 409, assinatura duplicada, slug reservado 400, Stripe sem price 422). `setErrorHandler` global cobre ZodError e 4xx do Fastify; webhook da Stripe não ecoa mais o erro. Teste-guarda proíbe `error.message` em `reply.send`. Obs.: o frontend só lê o status HTTP, então não há mudança de UX.
 5. `/auth/refresh` e JWT de 1 h/7 d sem revogação; `x-tenant-id` aceito para agendar sem validar que o tenant existe/está ativo (verificar).
 6. Rate limit global 100/min por IP; login 5/min já existe.
 

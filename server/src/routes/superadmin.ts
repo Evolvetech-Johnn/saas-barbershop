@@ -1,3 +1,4 @@
+import { sendError } from '../lib/httpError';
 import { SuperadminService } from '../services/superadminService';
 import { requireAuth, requirePlatformAdmin } from '../middlewares/authMiddleware';
 
@@ -6,7 +7,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
     try {
       return reply.send(await SuperadminService.getTenantsComEstatisticas());
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -15,7 +16,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
       const tenant = await SuperadminService.createTenant(request.body);
       return reply.status(201).send(tenant);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -26,7 +27,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
       if (!tenant) return reply.status(404).send({ error: 'Tenant not found' });
       return reply.send(tenant);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -37,7 +38,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
     try {
       return reply.send(await SuperadminService.getPlanos());
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -47,7 +48,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
       if (!plano) return reply.status(404).send({ error: 'Plano not found' });
       return reply.send(plano);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -55,7 +56,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
     try {
       return reply.send(await SuperadminService.getFaturas());
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -65,7 +66,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
       if (!fatura) return reply.status(404).send({ error: 'Fatura not found' });
       return reply.send(fatura);
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 
@@ -73,7 +74,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
     try {
       return reply.send(await SuperadminService.getReceitaTrend());
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message });
+      return sendError(reply, error);
     }
   });
 };

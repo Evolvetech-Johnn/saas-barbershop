@@ -1,3 +1,4 @@
+import { AppError } from '../lib/httpError';
 import { supabase } from '../lib/supabase';
 import { rowToCamel, dataToSnake } from '../lib/db';
 import { hasOverlap } from '../lib/timeOverlap';
@@ -136,7 +137,7 @@ export class AgendamentoService {
   static async create(data: Partial<Agendamento>) {
     if (data.tenantId && data.profissionalId && data.dataHora && data.duracaoMinutos) {
       const conflict = await this.checkConflict(data.tenantId, data.profissionalId, data.dataHora, data.duracaoMinutos);
-      if (conflict) throw new Error('Horário conflitante para este profissional.');
+      if (conflict) throw new AppError('Horário conflitante para este profissional.', 409);
     }
     const { data: row, error } = await supabase.from('agendamentos').insert(dataToSnake(data)).select().single();
     if (error) throw new Error(error.message);
@@ -146,7 +147,7 @@ export class AgendamentoService {
   static async update(tenantId: string, id: string, data: Partial<Agendamento>) {
     if (data.profissionalId && data.dataHora && data.duracaoMinutos) {
       const conflict = await this.checkConflict(tenantId, data.profissionalId, data.dataHora, data.duracaoMinutos, id);
-      if (conflict) throw new Error('Horário conflitante para este profissional.');
+      if (conflict) throw new AppError('Horário conflitante para este profissional.', 409);
     }
     const { data: row, error } = await supabase
       .from('agendamentos')
