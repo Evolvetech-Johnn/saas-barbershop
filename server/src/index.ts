@@ -7,6 +7,7 @@ import fastifyAutoload from '@fastify/autoload';
 import path from 'path';
 import dotenv from 'dotenv';
 import { connectDatabase, disconnectDatabase } from './config/database';
+import { assertEnv, jwtSecret } from './lib/env';
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
   // Use a require import here to avoid TypeScript issues with Fastify's callable type in this project setup.
@@ -17,7 +18,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 async function bootstrap() {
   try {
-    // Connect to MongoDB before starting the server
+    assertEnv(); // em produção falha no boot se faltar variável ou o JWT for fraco
     await connectDatabase();
 
     // Register plugins
@@ -26,7 +27,7 @@ async function bootstrap() {
     });
     await server.register(fastifyHelmet);
     await server.register(fastifyJwt, {
-      secret: process.env.JWT_PRIVATE_KEY || 'supersecret',
+      secret: jwtSecret(),
     });
     await server.register(fastifyRateLimit, {
       max: 100,

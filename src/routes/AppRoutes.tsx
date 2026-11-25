@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { TenantProvider, useTenant } from '@/context/TenantContext';
+import { tenantService } from '@/services/tenantService';
 import { ToastProvider } from '@/context/ToastContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { RoleBasedRoute } from '@/components/routes/RoleBasedRoute';
@@ -58,16 +59,23 @@ const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children
 
 const AppRoutesContent: React.FC = () => {
   const { usuario } = useAuth();
-  const { tenant, availableTenants, setTenant } = useTenant();
+  const { tenant, setTenant } = useTenant();
 
+  // A lista pública de tenants só traz campos de vitrine (sem plano/status). Para o usuário
+  // logado, busca o próprio tenant completo (o backend só devolve a visão completa ao dono).
   React.useEffect(() => {
-    if (usuario && availableTenants.length > 0) {
-      const userTenant = availableTenants.find((t) => ((t as any)._id || t.id) === usuario.tenantId);
-      if (userTenant) {
-        setTenant(userTenant);
-      }
-    }
-  }, [usuario, availableTenants, setTenant]);
+    if (!usuario) return;
+    let cancelled = false;
+    tenantService
+      .getTenantById(usuario.tenantId)
+      .then((own) => {
+        if (!cancelled && own) setTenant(own);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [usuario, setTenant]);
 
   // Se o usuário está logado e o tenant carregou, verifica se o onboarding foi concluído
   const isFirstAccess = usuario && tenant && !tenant.onboardingConcluido;

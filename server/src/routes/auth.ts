@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { UsuarioService } from '../services/usuarioService';
+import { getPlatformTenantId, isPlatformTenant } from '../lib/platform';
 
 const authRoutes = async (fastify: any, opts: any) => {
   // Login
@@ -38,8 +39,9 @@ const authRoutes = async (fastify: any, opts: any) => {
       fotoUrl: usuario.fotoUrl,
     };
 
-    const token = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.papel }, { expiresIn: '1h' });
-    const refreshToken = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.papel }, { expiresIn: '7d' });
+    const platform = user.papel === 'admin' && (await isPlatformTenant(user.tenantId));
+    const token = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.papel, platform }, { expiresIn: '1h' });
+    const refreshToken = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.papel, platform }, { expiresIn: '7d' });
     return reply.send({ token, refreshToken, user });
   });
 
@@ -52,8 +54,9 @@ const authRoutes = async (fastify: any, opts: any) => {
     });
     const { email, password } = bodySchema.parse(request.body);
 
-    const usuario = await UsuarioService.getAdminByEmail(email);
-    if (!usuario) {
+    const platformTenantId = await getPlatformTenantId();
+    const usuario = platformTenantId ? await UsuarioService.getByEmail(platformTenantId, email) : null;
+    if (!usuario || usuario.papel !== 'admin') {
       return reply.status(401).send({ error: 'Invalid credentials' });
     }
 
@@ -75,8 +78,8 @@ const authRoutes = async (fastify: any, opts: any) => {
       fotoUrl: usuario.fotoUrl,
     };
 
-    const token = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.papel }, { expiresIn: '1h' });
-    const refreshToken = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.papel }, { expiresIn: '7d' });
+    const token = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.papel, platform: true }, { expiresIn: '1h' });
+    const refreshToken = fastify.jwt.sign({ sub: user.id, tenantId: user.tenantId, role: user.papel, platform: true }, { expiresIn: '7d' });
     return reply.send({ token, refreshToken, user });
   });
 
@@ -90,7 +93,11 @@ const authRoutes = async (fastify: any, opts: any) => {
       if (!usuario) {
         return reply.status(401).send({ error: 'Invalid user' });
       }
-      const newToken = fastify.jwt.sign({ sub: decoded.sub, tenantId: decoded.tenantId, role: decoded.role }, { expiresIn: '1h' });
+      if (!usuario.ativo) {
+        return reply.status(401).send({ error: 'Invalid user' });
+      }
+      const platform = usuario.papel === 'admin' && (await isPlatformTenant(usuario.tenantId));
+      const newToken = fastify.jwt.sign({ sub: usuario.id, tenantId: usuario.tenantId, role: usuario.papel, platform }, { expiresIn: '1h' });
       return reply.send({ token: newToken });
     } catch (err) {
       return reply.status(401).send({ error: 'Invalid refresh token' });

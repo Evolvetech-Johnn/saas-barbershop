@@ -1,8 +1,8 @@
 import { SuperadminService } from '../services/superadminService';
-import { requireAuth, requireAdmin } from '../middlewares/authMiddleware';
+import { requireAuth, requirePlatformAdmin } from '../middlewares/authMiddleware';
 
 const superadminRoutes = async (fastify: any, opts: any) => {
-  fastify.get('/superadmin/tenants', { preHandler: requireAdmin }, async (_request: any, reply: any) => {
+  fastify.get('/superadmin/tenants', { preHandler: requirePlatformAdmin }, async (_request: any, reply: any) => {
     try {
       return reply.send(await SuperadminService.getTenantsComEstatisticas());
     } catch (error: any) {
@@ -10,7 +10,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  fastify.post('/superadmin/tenants', { preHandler: requireAdmin }, async (request: any, reply: any) => {
+  fastify.post('/superadmin/tenants', { preHandler: requirePlatformAdmin }, async (request: any, reply: any) => {
     try {
       const tenant = await SuperadminService.createTenant(request.body);
       return reply.status(201).send(tenant);
@@ -19,7 +19,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  fastify.patch('/superadmin/tenants/:id/status', { preHandler: requireAdmin }, async (request: any, reply: any) => {
+  fastify.patch('/superadmin/tenants/:id/status', { preHandler: requirePlatformAdmin }, async (request: any, reply: any) => {
     try {
       const { status } = request.body as { status: 'ativo' | 'inativo' };
       const tenant = await SuperadminService.setTenantStatus(request.params.id, status);
@@ -41,7 +41,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  fastify.put('/superadmin/planos/:id', { preHandler: requireAdmin }, async (request: any, reply: any) => {
+  fastify.put('/superadmin/planos/:id', { preHandler: requirePlatformAdmin }, async (request: any, reply: any) => {
     try {
       const plano = await SuperadminService.updatePlano(request.params.id, request.body);
       if (!plano) return reply.status(404).send({ error: 'Plano not found' });
@@ -51,7 +51,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  fastify.get('/superadmin/faturas', { preHandler: requireAdmin }, async (_request: any, reply: any) => {
+  fastify.get('/superadmin/faturas', { preHandler: requirePlatformAdmin }, async (_request: any, reply: any) => {
     try {
       return reply.send(await SuperadminService.getFaturas());
     } catch (error: any) {
@@ -59,7 +59,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  fastify.patch('/superadmin/faturas/:id/pagar', { preHandler: requireAdmin }, async (request: any, reply: any) => {
+  fastify.patch('/superadmin/faturas/:id/pagar', { preHandler: requirePlatformAdmin }, async (request: any, reply: any) => {
     try {
       const fatura = await SuperadminService.marcarFaturaPaga(request.params.id);
       if (!fatura) return reply.status(404).send({ error: 'Fatura not found' });
@@ -69,7 +69,7 @@ const superadminRoutes = async (fastify: any, opts: any) => {
     }
   });
 
-  fastify.get('/superadmin/receita-trend', { preHandler: requireAdmin }, async (_request: any, reply: any) => {
+  fastify.get('/superadmin/receita-trend', { preHandler: requirePlatformAdmin }, async (_request: any, reply: any) => {
     try {
       return reply.send(await SuperadminService.getReceitaTrend());
     } catch (error: any) {

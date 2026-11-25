@@ -30,3 +30,21 @@ export const requireAdmin = async (request: FastifyRequest, reply: FastifyReply)
     return (reply as any).code(401).send({ error: 'Unauthorized' });
   }
 };
+
+// Superadmin da plataforma: papel admin E claim `platform` no JWT. A claim só é
+// emitida no login/refresh quando o usuário pertence ao tenant da plataforma
+// (lib/platform.ts). Admin de barbearia comum NÃO passa aqui.
+export const requirePlatformAdmin = async (request: FastifyRequest, reply: FastifyReply) => {
+  try {
+    // @ts-ignore - fastify-jwt augments request with jwtVerify()
+    await (request as any).jwtVerify();
+    const payload = (request as any).user || {};
+    if (payload.role !== 'admin' || payload.platform !== true) {
+      return (reply as any).code(403).send({ error: 'Forbidden' });
+    }
+    (request as any).tenantId = payload.tenantId;
+    (request as any).userRole = payload.role;
+  } catch (err) {
+    return (reply as any).code(401).send({ error: 'Unauthorized' });
+  }
+};
